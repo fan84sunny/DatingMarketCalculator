@@ -3,369 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台灣婚戀市場 PR 值計算機 (Pro Ver.)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>婚戀工具集 - 台灣單身必玩</title>
     <style>
-        :root { --primary: #2563eb; --secondary: #1e293b; --bg: #f8fafc; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--secondary); line-height: 1.6; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        h1 { text-align: center; color: var(--secondary); margin-bottom: 10px; font-weight: 800; }
-        p.subtitle { text-align: center; color: #64748b; margin-bottom: 40px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
         
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; box-sizing: border-box; }
-        input:focus, select:focus { border-color: var(--primary); outline: none; ring: 2px solid var(--primary); }
-        .note { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; }
+        .container { max-width: 900px; width: 100%; }
         
-        button { grid-column: 1 / -1; width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: transform 0.1s, background 0.2s; margin-top: 20px; }
-        button:hover { background: #1d4ed8; transform: translateY(-1px); }
+        .header { text-align: center; margin-bottom: 50px; color: white; }
+        .header h1 { font-size: 3rem; font-weight: 800; margin-bottom: 15px; }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
         
-        #resultSection { display: none; margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 40px; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
         
-        .score-card { text-align: center; margin-bottom: 30px; }
-        .score-val { font-size: 4rem; font-weight: 900; color: var(--primary); line-height: 1; }
-        .score-label { font-size: 1.1rem; color: #64748b; font-weight: 500; margin-top: 10px; }
+        .card { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; cursor: pointer; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4); }
         
-        .chart-box { position: relative; height: 450px; width: 100%; }
+        .card-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        .card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; color: #1e293b; }
+        .card-desc { color: #64748b; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
         
-        /* 數值詳情表 */
-        .details-table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 0.9rem; }
-        .details-table th, .details-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        .details-table th { color: #64748b; font-weight: 600; }
-        .high-pr { color: #16a34a; font-weight: bold; }
-        .low-pr { color: #dc2626; font-weight: bold; }
+        .card-link { display: inline-block; color: #667eea; font-weight: 600; text-decoration: none; }
+        .card-link:hover { text-decoration: underline; }
+        
+        .card-1 { border-top: 4px solid #2563eb; }
+        .card-2 { border-top: 4px solid #ec4899; }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2rem; }
+            .header p { font-size: 1rem; }
+            .grid { grid-template-columns: 1fr; gap: 20px; }
+            .card { padding: 30px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📊 台灣婚戀市場常態分佈計算機</h1>
-    <p class="subtitle">基於 Log-Normal (收入) 與 Gaussian Distribution (身高等) 的精確 PR 模型</p>
+    <div class="header">
+        <h1>💕 婚戀工具集</h1>
+        <p>台灣單身男女必玩的互動工具</p>
+    </div>
 
     <div class="grid">
-        <div class="form-group">
-            <label>性別 (Gender)</label>
-            <select id="gender"><option value="male">男</option><option value="female">女</option></select>
-        </div>
-        <div class="form-group">
-            <label>1. 年齡 (Age)</label>
-            <input type="number" id="age" placeholder="31" value="31">
-            <div class="note">越年輕 Z-score 越高</div>
-        </div>
-        <div class="form-group">
-            <label>2. 年收入 (萬/TWD)</label>
-            <input type="number" id="income" placeholder="120" value="120">
-            <div class="note">採對數常態分佈計算 (Log-Normal)</div>
-        </div>
-        <div class="form-group">
-            <label>3. 身高 (cm)</label>
-            <input type="number" id="height" placeholder="175" value="175">
-            <div class="note">身高越高，累積百分比 (CDF) 越高</div>
-        </div>
-        <div class="form-group">
-            <label>4. 體重 (kg)</label>
-            <input type="number" id="weight" placeholder="70" value="70">
-            <div class="note">用於計算 BMI 標準常態偏離值</div>
-        </div>
-        <div class="form-group">
-            <label>5. 學歷 (Education)</label>
-            <select id="education">
-                <option value="98">博士/頂級名校碩士 (PR98)</option>
-                <option value="90">國立碩士/頂大熱門學士 (PR90)</option>
-                <option value="75" selected>國立學士/私立碩士 (PR75)</option>
-                <option value="60">私立學士 (PR60)</option>
-                <option value="40">高中職/專科 (PR40)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>6. 職業 (Job Prestige)</label>
-            <select id="job">
-                <option value="99">T1: 醫師/機師/司法官 (PR99)</option>
-                <option value="92">T2: 工程師/上市櫃主管 (PR92)</option>
-                <option value="80" selected>T3: 公職/國營/金融 (PR80)</option>
-                <option value="60">T4: 一般行政/服務業 (PR60)</option>
-                <option value="40">T5: 體力勞動/非典就業 (PR40)</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>7. 家世 (Family)</label>
-            <select id="family">
-                <option value="98">富裕 (資產億級) (PR98)</option>
-                <option value="90">優渥 (雙北無貸/高管退) (PR90)</option>
-                <option value="70" selected>小康 (有房無負擔) (PR70)</option>
-                <option value="50">普通 (需負擔部分家計) (PR50)</option>
-                <option value="30">困難 (有負債) (PR30)</option>
-            </select>
+        <!-- 計算機卡片 -->
+        <div class="card card-1">
+            <div class="card-icon">📊</div>
+            <div class="card-title">PR 值計算機</div>
+            <div class="card-desc">
+                基於常態分佈與台灣婚戀市場數據的個人評分系統。輸入年齡、收入、身高、學歷等個人資料，精確計算您在婚戀市場中的相對位置。
+            </div>
+            <a href="calculator.html" class="card-link">進入計算機 →</a>
         </div>
 
-        <button onclick="calculateAll()">⚡ 執行複雜運算</button>
-    </div>
-
-    <div id="resultSection">
-        <div class="score-card">
-            <div class="score-val" id="finalPR">--</div>
-            <div class="score-label">綜合 PR 值 (Weighted Percentile)</div>
+        <!-- 送命題卡片 -->
+        <div class="card card-2">
+            <div class="card-icon">💬</div>
+            <div class="card-title">女友送命題</div>
+            <div class="card-desc">
+                4大題庫涵蓋情侶互動、性格相容、愛情觀與未來規劃。透過有趣的問答遊戲，測試你和另一半的默契程度。
+            </div>
+            <a href="girlfriend-questions.html" class="card-link">開始挑戰 →</a>
         </div>
-        
-        <div class="chart-box">
-            <canvas id="radarChart"></canvas>
-        </div>
-
-        <table class="details-table">
-            <thead>
-                <tr>
-                    <th>維度</th>
-                    <th>原始數值</th>
-                    <th>Z-Score (標準差)</th>
-                    <th>單項 PR</th>
-                </tr>
-            </thead>
-            <tbody id="detailsBody">
-                </tbody>
-        </table>
     </div>
 </div>
-
-<script>
-    // =========================================================================
-    //  Math Core: Statistical Functions
-    // =========================================================================
-
-    /**
-     * 標準常態分佈累積函數 (CDF)
-     * 使用 Abramowitz and Stegun 近似算法 (誤差 < 7.5e-8)
-     * 輸入 Z 分數，回傳 0.0 ~ 1.0 的百分位
-     */
-    function normalCDF(z) {
-        // 如果 z > 6 或 z < -6，直接回傳極值，避免運算浪費
-        if (z < -6) return 0;
-        if (z > 6) return 1;
-
-        const p = 0.2316419;
-        const b1 = 0.319381530;
-        const b2 = -0.356563782;
-        const b3 = 1.781477937;
-        const b4 = -1.821255978;
-        const b5 = 1.330274429;
-
-        const t = 1 / (1 + p * Math.abs(z));
-        const pdf = (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * z * z);
-        const y = 1 - pdf * (b1 * t + b2 * Math.pow(t, 2) + b3 * Math.pow(t, 3) + b4 * Math.pow(t, 4) + b5 * Math.pow(t, 5));
-
-        return z < 0 ? 1 - y : y;
-    }
-
-    /**
-     * 通用計算函數：給定數值、平均值、標準差，回傳 PR (0-100)
-     */
-    function calculatePR(value, mean, stdDev) {
-        const z = (value - mean) / stdDev;
-        return {
-            z: z,
-            pr: normalCDF(z) * 100
-        };
-    }
-
-    // =========================================================================
-    //  Domain Logic: Taiwan Market Parameters
-    // =========================================================================
-
-    // 1. 年齡 (越年輕越好)
-    // 設定市場平均競爭者年齡 34 歲，標準差 5 歲
-    // 我們計算 Z 值時反過來： (34 - 你的年齡) / 5
-    // 這樣 29 歲的人 => (34-29)/5 = +1.0 SD (PR 84)
-    function getAgeStats(age) {
-        const mean = 34;
-        const std = 5.5; 
-        const z = (mean - age) / std; 
-        // 修正：極端年輕(例如18歲)雖然Z值很高，但在婚戀市場可能因經濟不穩略降，
-        // 但這裡遵照「越年輕越好」的純物理指標
-        return { z: z, pr: normalCDF(z) * 100 };
-    }
-
-    // 2. 收入 (Log-Normal Distribution)
-    // 台灣受薪中位數約 56萬，平均 70萬，PR90 約 120萬
-    // 取對數：ln(56) ≈ 4.02 (Mean Log), 推估 SD Log ≈ 0.6
-    function getIncomeStats(income) {
-        if (income <= 0) return { z: -3, pr: 0.1 };
-        
-        // 將收入取自然對數
-        const lnIncome = Math.log(income);
-        const lnMean = 4.025; // 對應約 56 萬
-        const lnStd = 0.55;   // 根據 PR90=120萬 反推的參數
-
-        const result = calculatePR(lnIncome, lnMean, lnStd);
-        return result; 
-    }
-
-    // 3. 身高 (Standard Normal)
-    function getHeightStats(height, gender) {
-        let mean, std;
-        if (gender === 'male') {
-            mean = 173.5; std = 5.8;
-        } else {
-            mean = 160.0; std = 5.0;
-        }
-        return calculatePR(height, mean, std);
-    }
-
-    // 4. BMI (雙向常態懲罰)
-    // 我們將 BMI 轉換為「距離理想值的標準差」
-    // 理想 BMI 22，標準差容許度約 3 (也就是 19-25 都在 1個 SD 內)
-    function getBodyStats(weight, heightCm) {
-        const h = heightCm / 100;
-        const bmi = weight / (h * h);
-        const ideal = 22;
-        const tolerance = 3.5; // 標準差寬度
-        
-        // 距離越遠，Z 分數越負 (代表越差)
-        // 這是雙尾分佈轉單尾優劣的邏輯： Z = -|BMI - Ideal| / Tolerance
-        // 加上一個 Offset 讓標準身材落在 PR99 附近
-        // 原始常態分佈最高點 Z=0 (PR50)，為了讓標準身材是 PR99，我們需要轉換坐標
-        
-        // 簡單作法：計算偏離度，然後用半常態分佈 (Half-Normal)
-        // 偏離 0 -> PR 99, 偏離 3.5 -> PR 68, 偏離 7 -> PR 5
-        const diff = Math.abs(bmi - ideal);
-        
-        // 這裡我們自定義一個衰減函數模擬 PR，因為 BMI 不是越高越好
-        // 使用高斯函數: exp(-x^2 / 2sigma^2)
-        // sigma = 4.5
-        const pr = 100 * Math.exp(-(diff * diff) / (2 * 4.5 * 4.5));
-        
-        // 反推一個虛擬 Z 值給表格顯示用 (僅供參考)
-        const displayZ = (pr > 50) ? (pr-50)/20 : (pr-50)/20; 
-        
-        return { z: displayZ, pr: pr, val: bmi.toFixed(1) };
-    }
-
-    // =========================================================================
-    //  UI & Chart Logic
-    // =========================================================================
-
-    let myChart = null;
-
-    function calculateAll() {
-        const gender = document.getElementById('gender').value;
-        const age = parseFloat(document.getElementById('age').value);
-        const income = parseFloat(document.getElementById('income').value);
-        const height = parseFloat(document.getElementById('height').value);
-        const weight = parseFloat(document.getElementById('weight').value);
-        
-        // 下拉選單直接是 PR 值 (因為這類離散數據很難連續化，除非有細部評分表)
-        const eduPR = parseFloat(document.getElementById('education').value);
-        const jobPR = parseFloat(document.getElementById('job').value);
-        const famPR = parseFloat(document.getElementById('family').value);
-
-        // 計算連續變數的精確 PR
-        const sAge = getAgeStats(age);
-        const sInc = getIncomeStats(income);
-        const sHgt = getHeightStats(height, gender);
-        const sBody = getBodyStats(weight, height);
-
-        // 權重設定 (Total = 1.0)
-        // 收入權重加重，因為這是婚戀市場的高槓桿因子
-        const W = { inc: 0.20, job: 0.15, age: 0.15, hgt: 0.15, edu: 0.10, fam: 0.15, body: 0.10 };
-        
-        let weightedScore = 
-            (sInc.pr * W.inc) + 
-            (jobPR * W.job) + 
-            (sAge.pr * W.age) + 
-            (sHgt.pr * W.hgt) + 
-            (eduPR * W.edu) + 
-            (famPR * W.fam) + 
-            (sBody.pr * W.body);
-
-        // 顯示結果
-        document.getElementById('resultSection').style.display = 'block';
-        
-        // 動畫跑分效果
-        animateValue("finalPR", 0, weightedScore.toFixed(1), 1000);
-
-        // 更新表格
-        const tbody = document.getElementById('detailsBody');
-        tbody.innerHTML = `
-            ${renderRow('年齡', age + '歲', sAge.z, sAge.pr)}
-            ${renderRow('年收入', income + '萬', sInc.z, sInc.pr)}
-            ${renderRow('身高', height + 'cm', sHgt.z, sHgt.pr)}
-            ${renderRow('BMI/體態', 'BMI ' + sBody.val, sBody.z, sBody.pr)}
-            ${renderRow('學歷', '類別', '-', eduPR)}
-            ${renderRow('職業', '類別', '-', jobPR)}
-            ${renderRow('家世', '類別', '-', famPR)}
-        `;
-
-        // 繪製圖表
-        drawChart([sAge.pr, sInc.pr, sHgt.pr, sBody.pr, eduPR, jobPR, famPR]);
-    }
-
-    function renderRow(name, val, z, pr) {
-        const prClass = pr >= 80 ? 'high-pr' : (pr < 40 ? 'low-pr' : '');
-        const zText = (typeof z === 'number') ? (z > 0 ? '+' : '') + z.toFixed(2) : '-';
-        return `<tr>
-            <td>${name}</td>
-            <td>${val}</td>
-            <td style="font-family: monospace;">${zText} SD</td>
-            <td class="${prClass}">${pr.toFixed(1)}</td>
-        </tr>`;
-    }
-
-    function animateValue(id, start, end, duration) {
-        const obj = document.getElementById(id);
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            obj.innerHTML = Math.floor(progress * (end - start) + start);
-            if (progress < 1) {
-                window.requestAnimationFrame(step);
-            } else {
-                obj.innerHTML = end; // 確保最後數值精確
-            }
-        };
-        window.requestAnimationFrame(step);
-    }
-
-    function drawChart(dataArr) {
-        const ctx = document.getElementById('radarChart').getContext('2d');
-        if (myChart) myChart.destroy();
-
-        myChart = new Chart(ctx, {
-            type: 'radar',
-            data: {
-                labels: ['年齡優勢', '經濟收入', '身高', '體態', '學歷', '職業', '家世'],
-                datasets: [{
-                    label: 'PR 值分布',
-                    data: dataArr,
-                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                    borderColor: 'rgba(37, 99, 235, 1)',
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#2563eb',
-                    pointHoverBackgroundColor: '#2563eb',
-                    pointHoverBorderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { color: '#e2e8f0' },
-                        grid: { color: '#e2e8f0' },
-                        pointLabels: { font: { size: 14, weight: 'bold' }, color: '#475569' },
-                        suggestedMin: 0,
-                        suggestedMax: 100,
-                        ticks: { stepSize: 20, backdropColor: 'transparent', font: { size: 10 } }
-                    }
-                },
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-</script>
 
 </body>
 </html>

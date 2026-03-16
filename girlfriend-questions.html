@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>女友送命題 - 考驗一下你們的默契</title>
+    <style>
+        :root { --primary: #ec4899; --secondary: #1e293b; --bg: #f8fafc; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--secondary); line-height: 1.6; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: var(--secondary); margin-bottom: 10px; font-weight: 800; }
+        p.subtitle { text-align: center; color: #64748b; margin-bottom: 40px; }
+        
+        .back-link { display: inline-block; margin-bottom: 20px; }
+        .back-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .back-link a:hover { text-decoration: underline; }
+        
+        .category-selector { margin-bottom: 30px; }
+        .category-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+        .category-btn { padding: 10px 20px; border: 2px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .category-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .category-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .question-card { background: #f8fafc; padding: 30px; border-radius: 12px; margin-bottom: 20px; display: none; }
+        .question-card.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .question-number { color: var(--primary); font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; }
+        .question-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: var(--secondary); }
+        
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; background: white; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .option:hover { border-color: var(--primary); background: #fdf2f8; }
+        .option.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        .navigation { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; gap: 10px; }
+        button { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        button:hover { background: #be185d; transform: translateY(-1px); }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .progress { text-align: center; color: #64748b; font-weight: 600; }
+        
+        .result-summary { background: #fdf2f8; padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary); display: none; }
+        .result-summary.show { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="back-link"><a href="index.html">← 返回首頁</a></div>
+    
+    <h1>💕 女友送命題</h1>
+    <p class="subtitle">考驗一下你們的默契 ✨</p>
+
+    <div class="category-selector">
+        <p style="font-weight: 600; margin-bottom: 15px;">選擇題庫：</p>
+        <div class="category-buttons">
+            <button class="category-btn active" onclick="switchCategory('couple')">情侶題</button>
+            <button class="category-btn" onclick="switchCategory('personality')">性格題</button>
+            <button class="category-btn" onclick="switchCategory('love')">愛情觀</button>
+            <button class="category-btn" onclick="switchCategory('future')">未來規劃</button>
+        </div>
+    </div>
+
+    <!-- 情侶題 -->
+    <div id="couple-questions" class="category">
+        <div class="question-card active">
+            <div class="question-number">問題 1/3</div>
+            <div class="question-text">第一次約會打算去哪裡？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">餐廳吃飯</div>
+                <div class="option" onclick="selectOption(this)">看電影</div>
+                <div class="option" onclick="selectOption(this)">戶外活動</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 2/3</div>
+            <div class="question-text">生日禮物最想收到什麼？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">手寫卡片</div>
+                <div class="option" onclick="selectOption(this)">精心挑選的禮物</div>
+                <div class="option" onclick="selectOption(this)">一起去旅行</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 3/3</div>
+            <div class="question-text">最喜歡對方的什麼？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">幽默感</div>
+                <div class="option" onclick="selectOption(this)">溫柔體貼</div>
+                <div class="option" onclick="selectOption(this)">上進心</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 性格題 -->
+    <div id="personality-questions" class="category" style="display: none;">
+        <div class="question-card active">
+            <div class="question-number">問題 1/3</div>
+            <div class="question-text">你是屬於哪種性格類型？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">內向沉靜型</div>
+                <div class="option" onclick="selectOption(this)">外向活潑型</div>
+                <div class="option" onclick="selectOption(this)">平衡綜合型</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 2/3</div>
+            <div class="question-text">面對衝突時的反應？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">冷靜理性討論</div>
+                <div class="option" onclick="selectOption(this)">需要時間冷靜</div>
+                <div class="option" onclick="selectOption(this)">直接表達想法</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 3/3</div>
+            <div class="question-text">更傾向於哪種休閒方式？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">宅家放鬆</div>
+                <div class="option" onclick="selectOption(this)">外出探險</div>
+                <div class="option" onclick="selectOption(this)">社交聚會</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 愛情觀題 -->
+    <div id="love-questions" class="category" style="display: none;">
+        <div class="question-card active">
+            <div class="question-number">問題 1/3</div>
+            <div class="question-text">認為愛情最重要的要素？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">信任與坦誠</div>
+                <div class="option" onclick="selectOption(this)">互相吸引</div>
+                <div class="option" onclick="selectOption(this)">共同目標</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 2/3</div>
+            <div class="question-text">對長期關係的期許？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">走入婚姻殿堂</div>
+                <div class="option" onclick="selectOption(this)">享受當下感受</div>
+                <div class="option" onclick="selectOption(this)">順其自然發展</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 3/3</div>
+            <div class="question-text">最難以接受的伴侶行為？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">說謊不誠實</div>
+                <div class="option" onclick="selectOption(this)">冷漠不在乎</div>
+                <div class="option" onclick="selectOption(this)">控制欲太強</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 未來規劃題 -->
+    <div id="future-questions" class="category" style="display: none;">
+        <div class="question-card active">
+            <div class="question-number">問題 1/3</div>
+            <div class="question-text">5年內的人生目標？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">事業成就</div>
+                <div class="option" onclick="selectOption(this)">家庭幸福</div>
+                <div class="option" onclick="selectOption(this)">自我成長</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 2/3</div>
+            <div class="question-text">理想的生活方式？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">城市繁華生活</div>
+                <div class="option" onclick="selectOption(this)">鄉村寧靜生活</div>
+                <div class="option" onclick="selectOption(this)">到處旅行探險</div>
+            </div>
+        </div>
+
+        <div class="question-card">
+            <div class="question-number">問題 3/3</div>
+            <div class="question-text">對於有小孩的想法？</div>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">一定要有孩子</div>
+                <div class="option" onclick="selectOption(this)">可有可無</div>
+                <div class="option" onclick="selectOption(this)">暫時還沒想好</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="result-summary" id="resultSummary">
+        <p style="font-weight: 600; margin-bottom: 10px;">✨ 你的答案已記錄完成！</p>
+        <p style="font-size: 0.95rem;">感謝參加，期待看到你和對方的默契程度喔 💕</p>
+    </div>
+
+    <div class="navigation">
+        <button onclick="prevQuestion()" id="prevBtn" disabled>← 上一題</button>
+        <div class="progress">
+            <span id="currentQuestion">1</span> / <span id="totalQuestions">3</span>
+        </div>
+        <button onclick="nextQuestion()" id="nextBtn">下一題 →</button>
+    </div>
+</div>
+
+<script>
+    let currentCategory = 'couple';
+    let currentQuestionIndex = 0;
+    const totalQuestions = 3;
+
+    function switchCategory(category) {
+        // 隱藏所有題庫
+        document.querySelectorAll('.category').forEach(cat => {
+            cat.style.display = 'none';
+        });
+        
+        // 隱藏結果
+        document.getElementById('resultSummary').classList.remove('show');
+        
+        // 顯示選中的題庫
+        document.getElementById(category + '-questions').style.display = 'block';
+        
+        // 更新按鈕狀態
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        currentCategory = category;
+        currentQuestionIndex = 0;
+        updateDisplay();
+    }
+
+    function selectOption(element) {
+        const optionsContainer = element.parentElement;
+        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+        element.classList.add('selected');
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            updateDisplay();
+        }
+    }
+
+    function nextQuestion() {
+        const currentCard = getCurrentQuestion();
+        const selected = currentCard.querySelector('.option.selected');
+        
+        if (!selected) {
+            alert('請先選擇一個答案！');
+            return;
+        }
+
+        if (currentQuestionIndex < totalQuestions - 1) {
+            currentQuestionIndex++;
+            updateDisplay();
+        } else {
+            // 最後一題，顯示完成提示
+            document.getElementById('resultSummary').classList.add('show');
+            document.getElementById('nextBtn').disabled = true;
+        }
+    }
+
+    function updateDisplay() {
+        const questions = document.querySelectorAll(`#${currentCategory}-questions .question-card`);
+        
+        // 隱藏所有題目
+        questions.forEach(q => q.classList.remove('active'));
+        
+        // 顯示當前題目
+        questions[currentQuestionIndex].classList.add('active');
+        
+        // 更新進度顯示
+        document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+        
+        // 更新按鈕狀態
+        document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+        document.getElementById('nextBtn').disabled = false;
+        document.getElementById('nextBtn').textContent = 
+            currentQuestionIndex === totalQuestions - 1 ? '完成 ✓' : '下一題 →';
+    }
+
+    function getCurrentQuestion() {
+        return document.querySelectorAll(`#${currentCategory}-questions .question-card`)[currentQuestionIndex];
+    }
+
+    // 初始化
+    updateDisplay();
+</script>
+
+</body>
+</html>
