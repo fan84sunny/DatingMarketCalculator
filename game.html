@@ -64,8 +64,9 @@
         .top-info { 
             display: flex;
             gap: 40px;
-            justify-content: center;
+            justify-content: space-between;
             width: 100%;
+            padding: 0 40px;
         }
         
         .score-box, .timer-box { 
@@ -308,7 +309,7 @@
             </div>
             <div class="timer-box">
                 <div>⏱️ 倒計時</div>
-                <div class="timer-value" id="timerDisplay">10</div>
+                <div class="timer-value" id="timerDisplay">--</div>
             </div>
         </div>
         
@@ -342,8 +343,8 @@
     // 遊戲配置
     const GAME_CONFIG = {
         maxScore: 10,
-        questionInterval: 10000, // 10秒
-        questionDuration: 10000   // 10秒回答時間
+        questionInterval: 3000, // 3秒出現一題
+        questionDuration: 3000   // 3秒回答時間
     };
     
     // 問題庫 - 格式: {問題, 選項: [{文案, 評分}]}
@@ -531,14 +532,6 @@
     
     // 初始化遊戲
     function initGame() {
-        // 調試信息
-        const bgScroll = document.getElementById('backgroundScroll');
-        const container = document.querySelector('.game-container');
-        console.log('背景寬度:', bgScroll.offsetWidth);
-        console.log('視窗寬度:', window.innerWidth);
-        console.log('容器寬度:', container.offsetWidth);
-        console.log('最大滾動範圍:', Math.max(1726 - window.innerWidth, 0));
-        
         updateScoreDisplay();
         adjustBackgroundScale();
         scheduleNextQuestion();
@@ -622,9 +615,9 @@
         startQuestionTimer();
     }
     
-    // 問題倒計時
+    // 問題倒計時 - 改為3秒答題時間
     function startQuestionTimer() {
-        let timeLeft = 10;
+        let timeLeft = 3;
         document.getElementById('timerDisplay').textContent = timeLeft;
         
         const timerInterval = setInterval(() => {
@@ -637,7 +630,13 @@
                     hideQuestion(); // 時間到自動關閉問題
                     gameState.score = Math.max(0, gameState.score - 1); // 時間到扣1分
                     updateScoreDisplay();
-                    scheduleNextQuestion();
+                    
+                    // 檢查遊戲是否結束
+                    if (gameState.score <= 0) {
+                        endGame();
+                    } else {
+                        scheduleNextQuestion();
+                    }
                 }
             }
         }, 1000);
@@ -661,7 +660,7 @@
         const options = document.querySelectorAll('.option');
         options[optionIndex].classList.add(score > 0 ? 'correct' : 'wrong');
         
-        // 1秒後隱藏問題
+        // 800毫秒後隱藏問題並進行下一個
         setTimeout(() => {
             hideQuestion();
             
@@ -671,12 +670,14 @@
             } else {
                 scheduleNextQuestion();
             }
-        }, 1500);
+        }, 800);
     }
     
     // 隱藏問題
     function hideQuestion() {
         document.getElementById('questionModal').classList.remove('active');
+        // 重置倒數計時器顯示為3秒
+        document.getElementById('timerDisplay').textContent = '3';
     }
     
     // 更新分數顯示
