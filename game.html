@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>女友送命題 - 挑戰遊戲</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body { background: #000; }
+        
+        .game-container { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+        
+        /* 背景滾動效果 */
+        .background-scroll { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1726px;
+            height: 612px;
+            background-image: url('image/background_full.png');
+            background-size: cover;
+            background-position: center;
+            transform: scale(var(--scale-y));
+            transform-origin: top left;
+        }
+        
+        /* 人物固定在中間 */
+        .character { 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .character img { 
+            height: 80vh;
+            max-height: 600px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+        }
+        
+        /* 遊戲 UI 層 */
+        .ui-layer { 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 20px;
+            z-index: 200;
+            pointer-events: none;
+        }
+        
+        /* 頂部分數和計時器 */
+        .top-info { 
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .score-box, .timer-box { 
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #ec4899;
+            text-align: center;
+        }
+        
+        .score-text { font-size: 0.9rem; color: #ccc; margin-top: 5px; }
+        
+        .timer-box { border-color: #3b82f6; }
+        
+        .score-value { 
+            font-size: 2.5rem;
+            color: #ec4899;
+        }
+        
+        .timer-value { 
+            font-size: 2.5rem;
+            color: #3b82f6;
+        }
+        
+        /* 問題區域 */
+        .question-modal { 
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(30, 30, 50, 0.95) 100%);
+            border: 3px solid #ec4899;
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            display: none;
+            flex-direction: column;
+            z-index: 300;
+            box-shadow: 0 0 50px rgba(236, 72, 153, 0.5);
+            pointer-events: all;
+        }
+        
+        .question-modal.active { display: flex; }
+        
+        .question-text { 
+            color: #fbbf24;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .options-container { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .option { 
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #64748b;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-align: left;
+            line-height: 1.5;
+            pointer-events: all;
+        }
+        
+        .option:hover { 
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ec4899;
+        }
+        
+        .option-label { 
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #3b82f6;
+        }
+        
+        .option-text { 
+            display: block;
+            color: #e2e8f0;
+        }
+        
+        .option.correct { 
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        
+        .option.wrong { 
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+        
+        /* 遊戲結束螢幕 */
+        .game-over-modal { 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            pointer-events: all;
+        }
+        
+        .game-over-modal.active { display: flex; }
+        
+        .game-over-content { 
+            text-align: center;
+            color: white;
+        }
+        
+        .game-over-title { 
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #ef4444;
+        }
+        
+        .game-over-score { 
+            font-size: 2rem;
+            margin-bottom: 40px;
+            color: #fbbf24;
+        }
+        
+        .game-over-message { 
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+        
+        .game-over-btn { 
+            background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            pointer-events: all;
+        }
+        
+        .game-over-btn:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
+        }
+        
+        .home-btn { 
+            background: #3b82f6;
+            margin-left: 15px;
+        }
+        
+        .home-btn:hover { 
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* 鍵盤提示 */
+        .keyboard-hint { 
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            z-index: 150;
+        }
+        
+        .keyboard-hint span { 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 12px;
+            border-radius: 6px;
+            margin: 0 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .question-modal { 
+                padding: 30px;
+                max-width: 95%;
+            }
+            
+            .question-text { 
+                font-size: 1.3rem;
+            }
+            
+            .score-box, .timer-box { 
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+            
+            .score-value, .timer-value { 
+                font-size: 1.8rem;
+            }
+            
+            .top-info { 
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <!-- 背景滾動容器 -->
+    <div class="background-scroll" id="backgroundScroll"></div>
+    
+    <!-- 人物角色 -->
+    <div class="character">
+        <img src="image/Girl_standing.png" alt="角色">
+    </div>
+    
+    <!-- UI 層 -->
+    <div class="ui-layer">
+        <!-- 頂部信息 -->
+        <div class="top-info">
+            <div class="score-box">
+                <div>❤️ 好感度</div>
+                <div class="score-value" id="scoreDisplay">10</div>
+            </div>
+            <div class="timer-box">
+                <div>⏱️ 倒計時</div>
+                <div class="timer-value" id="timerDisplay">10</div>
+            </div>
+        </div>
+        
+        <!-- 問題彈窗 -->
+        <div class="question-modal" id="questionModal">
+            <div class="question-text" id="questionText"></div>
+            <div class="options-container" id="optionsContainer"></div>
+        </div>
+    </div>
+    
+    <!-- 遊戲結束彈窗 -->
+    <div class="game-over-modal" id="gameOverModal">
+        <div class="game-over-content">
+            <div class="game-over-title">💔 遊戲結束</div>
+            <div class="game-over-score" id="finalScore"></div>
+            <div class="game-over-message" id="gameOverMessage"></div>
+            <div>
+                <button class="game-over-btn" onclick="location.reload()">再挑戰一次</button>
+                <button class="game-over-btn home-btn" onclick="window.location.href='index.html'">返回首頁</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 鍵盤提示 -->
+    <div class="keyboard-hint">
+        <span>← →</span> 移動背景視角
+    </div>
+</div>
+
+<script>
+    // 遊戲配置
+    const GAME_CONFIG = {
+        maxScore: 10,
+        questionInterval: 10000, // 10秒
+        questionDuration: 10000   // 10秒回答時間
+    };
+    
+    // 問題庫 - 格式: {問題, 選項: [{文案, 評分}]}
+    const questions = [
+        {
+            text: "我和你媽掉水裡你先救誰？",
+            options: [
+                {
+                    text: "我肯定先救你，因為媽媽知道我愛你，她也會希望我救你！",
+                    score: 3
+                },
+                {
+                    text: "這是不可能的假設...",
+                    score: -1
+                },
+                {
+                    text: "我都救，我會游到你身邊，然後一起遊回去！",
+                    score: 1
+                }
+            ]
+        },
+        {
+            text: "我閨蜜/前女友漂亮嗎？",
+            options: [
+                {
+                    text: "沒注意，我眼裡只有你，比起她們，你更讓我著迷！",
+                    score: 3
+                },
+                {
+                    text: "還好啦，也沒多漂亮",
+                    score: -2
+                },
+                {
+                    text: "我沒特別觀察...為什麼問这個？",
+                    score: 0
+                }
+            ]
+        },
+        {
+            text: "這件衣服/這條裙子我穿好看嗎？",
+            options: [
+                {
+                    text: "穿哪一條都好看！這條顯得你特別有氣質，很適合你！",
+                    score: 3
+                },
+                {
+                    text: "還可以吧，感覺沒什麼特別",
+                    score: -2
+                },
+                {
+                    text: "有點肥，不如試試另一件？",
+                    score: -3
+                }
+            ]
+        },
+        {
+            text: "你覺得我哪裡胖了/醜了？",
+            options: [
+                {
+                    text: "你不胖！你這叫豐滿，抱起來超舒服，哪裡都好看！",
+                    score: 3
+                },
+                {
+                    text: "你連一點點都不胖啊",
+                    score: 1
+                },
+                {
+                    text: "可是你最近確實胖了一圈...",
+                    score: -3
+                }
+            ]
+        },
+        {
+            text: "我和你的遊戲/工作/兄弟誰重要？",
+            options: [
+                {
+                    text: "當然是你！遊戲可以再玩，工作可以再找，但你是唯一的！",
+                    score: 3
+                },
+                {
+                    text: "嗯...都很重要吧？",
+                    score: -1
+                },
+                {
+                    text: "工作啦，要養家啊！",
+                    score: -3
+                }
+            ]
+        },
+        {
+            text: "你為什麼沒有第一時間回我訊息？",
+            options: [
+                {
+                    text: "對不起！我馬上看，因為你太重要了，我應該隨時關注你！",
+                    score: 2
+                },
+                {
+                    text: "我在忙啊，不是故意的",
+                    score: -1
+                },
+                {
+                    text: "怎樣，我沒有義務24小時都回你啊!",
+                    score: -3
+                }
+            ]
+        },
+        {
+            text: "你有沒有看我昨天的限時動態貼文？",
+            options: [
+                {
+                    text: "有啊！我怎麼會錯過，你怎麼這麼可愛呢？",
+                    score: 2
+                },
+                {
+                    text: "沒注意到欸，你發了什麼？",
+                    score: -1
+                },
+                {
+                    text: "沒有，我很少看這些的",
+                    score: -2
+                }
+            ]
+        },
+        {
+            text: "咱們什麼時候結婚呢？",
+            options: [
+                {
+                    text: "我一直在等妳說好呢！只要妳願意，我隨時都準備好！",
+                    score: 3
+                },
+                {
+                    text: "還早啦，我們再考慮考慮",
+                    score: -1
+                },
+                {
+                    text: "我還沒想好呢...",
+                    score: -2
+                }
+            ]
+        },
+        {
+            text: "你有沒有想過和我一起的未來？",
+            options: [
+                {
+                    text: "一直在想呢！你的未來就是我的未來，我想和你一起走過每一天！",
+                    score: 3
+                },
+                {
+                    text: "想是想啦，但還要看機會",
+                    score: 0
+                },
+                {
+                    text: "別問這麼沉重的問題啦...",
+                    score: -2
+                }
+            ]
+        },
+        {
+            text: "你是真的愛我嗎？",
+            options: [
+                {
+                    text: "當然愛你！你對我來說是最特別的，我願意為你做任何事！",
+                    score: 3
+                },
+                {
+                    text: "應該吧，我們在一起這麼久了",
+                    score: -1
+                },
+                {
+                    text: "我...我不太會表達...",
+                    score: -2
+                }
+            ]
+        }
+    ];
+    
+    // 遊戲狀態
+    let gameState = {
+        score: GAME_CONFIG.maxScore,
+        isGameOver: false,
+        currentQuestion: null,
+        questionActive: false,
+        scrollPosition: 0
+    };
+    
+    // 初始化遊戲
+    function initGame() {
+        // 調試信息
+        const bgScroll = document.getElementById('backgroundScroll');
+        const container = document.querySelector('.game-container');
+        console.log('背景寬度:', bgScroll.offsetWidth);
+        console.log('視窗寬度:', window.innerWidth);
+        console.log('容器寬度:', container.offsetWidth);
+        console.log('最大滾動範圍:', Math.max(1726 - window.innerWidth, 0));
+        
+        updateScoreDisplay();
+        adjustBackgroundScale();
+        scheduleNextQuestion();
+        setupKeyboardControls();
+    }
+    
+    // 調整背景縮放以填滿屏幕
+    function adjustBackgroundScale() {
+        const container = document.querySelector('.game-container');
+        const bgScroll = document.getElementById('backgroundScroll');
+        const scaleY = container.clientHeight / 612;
+        bgScroll.style.setProperty('--scale-y', scaleY);
+    }
+    
+    // 鍵盤控制 - 左右箭頭移動背景
+    function setupKeyboardControls() {
+        document.addEventListener('keydown', (e) => {
+            if (gameState.isGameOver) return;
+            
+            const bgScroll = document.getElementById('backgroundScroll');
+            const container = document.querySelector('.game-container');
+            
+            // 計算縮放係數
+            const scaleY = container.clientHeight / 612;
+            // 縮放後的實際背景寬度
+            const scaledBgWidth = 1726 * scaleY;
+            // 最大滾動範圍 = 縮放後的背景寬度 - 視窗寬度
+            const maxScroll = Math.max(scaledBgWidth - window.innerWidth, 0);
+            const moveDistance = 50;
+            
+            if (e.key === 'ArrowLeft') {
+                gameState.scrollPosition = Math.max(0, gameState.scrollPosition - moveDistance);
+                bgScroll.style.left = -gameState.scrollPosition + 'px';
+            } else if (e.key === 'ArrowRight') {
+                gameState.scrollPosition = Math.min(maxScroll, gameState.scrollPosition + moveDistance);
+                bgScroll.style.left = -gameState.scrollPosition + 'px';
+            }
+        });
+    }
+    
+    // 排程下一個問題
+    function scheduleNextQuestion() {
+        if (gameState.isGameOver) return;
+        
+        setTimeout(() => {
+            if (!gameState.isGameOver) {
+                showQuestion();
+            }
+        }, GAME_CONFIG.questionInterval);
+    }
+    
+    // 顯示問題
+    function showQuestion() {
+        // 隨機選擇一個問題
+        const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+        gameState.currentQuestion = randomQuestion;
+        gameState.questionActive = true;
+        
+        // 更新問題文本
+        document.getElementById('questionText').textContent = randomQuestion.text;
+        
+        // 生成選項
+        const optionsContainer = document.getElementById('optionsContainer');
+        optionsContainer.innerHTML = '';
+        
+        randomQuestion.options.forEach((option, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option';
+            optionDiv.innerHTML = `
+                <span class="option-label">選項 ${index + 1}</span>
+                <span class="option-text">${option.text}</span>
+            `;
+            optionDiv.addEventListener('click', () => selectOption(index, option.score));
+            optionsContainer.appendChild(optionDiv);
+        });
+        
+        // 顯示問題彈窗
+        document.getElementById('questionModal').classList.add('active');
+        
+        // 設置倒計時
+        startQuestionTimer();
+    }
+    
+    // 問題倒計時
+    function startQuestionTimer() {
+        let timeLeft = 10;
+        document.getElementById('timerDisplay').textContent = timeLeft;
+        
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerDisplay').textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                if (gameState.questionActive) {
+                    hideQuestion(); // 時間到自動關閉問題
+                    gameState.score = Math.max(0, gameState.score - 1); // 時間到扣1分
+                    updateScoreDisplay();
+                    scheduleNextQuestion();
+                }
+            }
+        }, 1000);
+        
+        // 儲存interval ID以便後續清除
+        gameState.timerInterval = timerInterval;
+    }
+    
+    // 選擇選項
+    function selectOption(optionIndex, score) {
+        if (!gameState.questionActive) return;
+        
+        gameState.questionActive = false;
+        clearInterval(gameState.timerInterval);
+        
+        // 更新分數
+        gameState.score = Math.max(0, Math.min(10, gameState.score + score));
+        updateScoreDisplay();
+        
+        // 顯示分數變化
+        const options = document.querySelectorAll('.option');
+        options[optionIndex].classList.add(score > 0 ? 'correct' : 'wrong');
+        
+        // 1秒後隱藏問題
+        setTimeout(() => {
+            hideQuestion();
+            
+            // 檢查遊戲是否結束
+            if (gameState.score <= 0) {
+                endGame();
+            } else {
+                scheduleNextQuestion();
+            }
+        }, 1500);
+    }
+    
+    // 隱藏問題
+    function hideQuestion() {
+        document.getElementById('questionModal').classList.remove('active');
+    }
+    
+    // 更新分數顯示
+    function updateScoreDisplay() {
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        scoreDisplay.textContent = gameState.score;
+        
+        // 分數低時變紅
+        if (gameState.score <= 3) {
+            scoreDisplay.style.color = '#ef4444';
+        } else if (gameState.score <= 5) {
+            scoreDisplay.style.color = '#f97316';
+        } else {
+            scoreDisplay.style.color = '#ec4899';
+        }
+    }
+    
+    // 遊戲結束
+    function endGame() {
+        gameState.isGameOver = true;
+        
+        document.getElementById('finalScore').textContent = `最終好感度: ${gameState.score} / 10`;
+        document.getElementById('gameOverMessage').textContent = 
+            gameState.score < 3 
+                ? "嗯...你說的話似乎激怒了她😭，恭喜你成功踩雷！下次要更小心啦！" 
+                : "遊戲結束了！你的回答讓她很失望💔";
+        
+        document.getElementById('gameOverModal').classList.add('active');
+    }
+    
+    // 處理窗口大小變化
+    window.addEventListener('resize', adjustBackgroundScale);
+    
+    // 啟動遊戲
+    window.addEventListener('load', initGame);
+</script>
+
+</body>
+</html>
