@@ -487,8 +487,8 @@
     // 遊戲配置
     const GAME_CONFIG = {
         maxScore: 10,
-        questionInterval: 3000, // 3秒出現一題
-        questionDuration: 3000   // 3秒回答時間
+        questionInterval: 5000, // 5秒出現一題
+        questionDuration: 5000   // 5秒回答時間
     };
     
     // 問題庫 - 格式: {問題, 選項: [{文案, 評分}]}
@@ -772,6 +772,14 @@
                 { text: "會，我會誠實說清楚並負責任收尾。", score: 3 },
                 { text: "不會有那天，我的愛濃度永遠 100%。", score: -2 },
                 { text: "不會，省麻煩。", score: -3 }
+            ]
+        },
+        {
+            text: "我懷孕了，該怎麼辦？",
+            options: [
+                { text: "先結婚，後續計畫討論下。", score: 3 },
+                { text: "先生下來，結婚可以之後再討論。", score: 0 },
+                { text: "拿掉，或先有小孩再結婚，先走一步看一步。", score: -2 }
             ]
         }
     ];
