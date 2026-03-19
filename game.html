@@ -79,6 +79,17 @@
             border: 2px solid #ec4899;
             text-align: center;
         }
+
+        .personality-box {
+            border-color: #22c55e;
+            min-width: 240px;
+        }
+
+        .personality-value {
+            font-size: 1.2rem;
+            color: #86efac;
+            margin-top: 6px;
+        }
         
         .score-text { font-size: 0.9rem; color: #ccc; margin-top: 5px; }
         
@@ -123,6 +134,18 @@
             margin-bottom: 30px;
             text-align: center;
             line-height: 1.4;
+        }
+
+        .question-timer {
+            align-self: center;
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            background: rgba(15, 23, 42, 0.65);
+            border-radius: 999px;
+            padding: 6px 14px;
+            margin: 0 auto 14px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
         
         .options-container { 
@@ -190,6 +213,91 @@
         }
         
         .game-over-modal.active { display: flex; }
+
+        .start-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 380;
+            padding: 20px;
+            pointer-events: all;
+        }
+
+        .start-modal.hidden {
+            display: none;
+        }
+
+        .start-card {
+            width: min(960px, 95vw);
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(30, 41, 59, 0.95));
+            border: 2px solid #38bdf8;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        }
+
+        .start-title {
+            color: #f8fafc;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .start-subtitle {
+            color: #cbd5e1;
+            text-align: center;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .personality-card {
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.72);
+            color: #e2e8f0;
+            padding: 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .personality-card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .personality-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .personality-desc {
+            color: #cbd5e1;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            min-height: 72px;
+        }
+
+        .personality-rule {
+            color: #67e8f9;
+            font-size: 0.82rem;
+            margin-top: 8px;
+        }
         
         .game-over-content { 
             text-align: center;
@@ -285,6 +393,27 @@
             .top-info { 
                 gap: 20px;
             }
+
+            .personality-box {
+                min-width: 0;
+                padding: 10px 16px;
+            }
+
+            .personality-value {
+                font-size: 0.95rem;
+            }
+
+            .personality-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .start-card {
+                padding: 22px;
+            }
+
+            .start-title {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
@@ -308,13 +437,19 @@
                 <div class="score-value" id="scoreDisplay">10</div>
             </div>
             <div class="timer-box">
-                <div>⏱️ 倒計時</div>
-                <div class="timer-value" id="timerDisplay">--</div>
+                <div>📊 題目進度</div>
+                <div class="timer-value" id="testedDisplay">0</div>
+                <div class="score-text">未測：<span id="untestedDisplay">0</span></div>
+            </div>
+            <div class="score-box personality-box">
+                <div>🎯 個性模式</div>
+                <div class="personality-value" id="personalityDisplay">未選擇</div>
             </div>
         </div>
         
         <!-- 問題彈窗 -->
         <div class="question-modal" id="questionModal">
+            <div class="question-timer">⏱️ 倒數 <span id="questionTimerDisplay">--</span></div>
             <div class="question-text" id="questionText"></div>
             <div class="options-container" id="optionsContainer"></div>
         </div>
@@ -330,6 +465,15 @@
                 <button class="game-over-btn" onclick="location.reload()">再挑戰一次</button>
                 <button class="game-over-btn home-btn" onclick="window.location.href='index.html'">返回首頁</button>
             </div>
+        </div>
+    </div>
+
+    <!-- 開局人格選擇 -->
+    <div class="start-modal" id="startModal">
+        <div class="start-card">
+            <div class="start-title">先選她的個性，再開始遊戲</div>
+            <div class="start-subtitle">每種個性對同一句話的喜好都不同，分數邏輯也會跟著改變。</div>
+            <div class="personality-grid" id="personalityGrid"></div>
         </div>
     </div>
     
@@ -348,619 +492,395 @@
     };
     
     // 問題庫 - 格式: {問題, 選項: [{文案, 評分}]}
-    const questions = [
+    
+    const pragmaticQuestions = [
         {
             text: "我和你媽掉水裡你先救誰？",
             options: [
-                {
-                    text: "我肯定先救你，因為媽媽知道我愛你，她也會希望我救你！",
-                    score: 3
-                },
-                {
-                    text: "這是不可能的假設...",
-                    score: -1
-                },
-                {
-                    text: "我都救，我會游到你身邊，然後一起遊回去！",
-                    score: 1
-                }
+                { text: "先救離我最近、最危急的，然後立刻找人支援。", score: 3 },
+                { text: "我當然先救你！你是我唯一、我願意為你不要命！", score: -3 },
+                { text: "這題很難，先別聊這個。", score: 0 }
             ]
         },
         {
             text: "我閨蜜/前女友漂亮嗎？",
             options: [
-                {
-                    text: "沒注意，我眼裡只有你，比起她們，你更讓我著迷！",
-                    score: 3
-                },
-                {
-                    text: "還好啦，也沒多漂亮",
-                    score: -2
-                },
-                {
-                    text: "我沒特別觀察...為什麼問這個？",
-                    score: 0
-                }
+                { text: "每個人審美不同，我比較在乎相處舒服。", score: 3 },
+                { text: "你最美，她們根本不能比，我眼裡只有你。", score: -2 },
+                { text: "普通吧。", score: -1 }
             ]
         },
         {
             text: "這件衣服/這條裙子我穿好看嗎？",
             options: [
-                {
-                    text: "穿哪一條都好看！這條顯得你特別有氣質，很適合你！",
-                    score: 3
-                },
-                {
-                    text: "還可以吧，感覺沒什麼特別",
-                    score: -2
-                },
-                {
-                    text: "有點肥，不如試試另一件？",
-                    score: -3
-                }
+                { text: "版型很適合你，走路也方便。", score: 3 },
+                { text: "我會用我全部的人生告訴你你穿什麼都像女神降臨，連空氣都在發光。", score: -3 },
+                { text: "還行。", score: 0 }
             ]
         },
         {
             text: "你覺得我哪裡胖了/醜了？",
             options: [
-                {
-                    text: "你不胖！你這叫豐滿，抱起來超舒服，哪裡都好看！",
-                    score: 3
-                },
-                {
-                    text: "你連一點點都不胖啊",
-                    score: 1
-                },
-                {
-                    text: "可是你最近確實胖了一圈...",
-                    score: -3
-                }
+                { text: "我不會用這種方式評論你外表，有需要我們一起調整狀態。", score: 3 },
+                { text: "你超完美，一點缺點都沒有！", score: -2 },
+                { text: "最近是有一點。", score: -3 }
             ]
         },
         {
             text: "我和你的遊戲/工作/兄弟誰重要？",
             options: [
-                {
-                    text: "當然是你！遊戲可以再玩，工作可以再找，但你是唯一的！",
-                    score: 3
-                },
-                {
-                    text: "嗯...都很重要吧？",
-                    score: -1
-                },
-                {
-                    text: "工作啦，要養家啊！",
-                    score: -3
-                }
+                { text: "都重要，但你是伴侶，我會先處理我們的事。", score: 3 },
+                { text: "你最重要，其他全部都可以丟掉。", score: -2 },
+                { text: "工作最重要。", score: -2 }
             ]
         },
         {
             text: "你為什麼沒有第一時間回我訊息？",
             options: [
-                {
-                    text: "對不起！我馬上看，因為你太重要了，我應該隨時關注你！",
-                    score: 2
-                },
-                {
-                    text: "我在忙啊，不是故意的",
-                    score: -1
-                },
-                {
-                    text: "怎樣，我沒有義務24小時都回你啊!",
-                    score: -3
-                }
+                { text: "剛在忙，現在回你；下次我會先說一聲。", score: 3 },
+                { text: "對不起寶貝我罪該萬死，我發誓以後 0.1 秒內回你。", score: -2 },
+                { text: "我愛回就回。", score: -3 }
             ]
         },
         {
             text: "你有沒有看我昨天的限時動態貼文？",
             options: [
-                {
-                    text: "有啊！我怎麼會錯過，你怎麼這麼可愛呢？",
-                    score: 2
-                },
-                {
-                    text: "沒注意到欸，你發了什麼？",
-                    score: -1
-                },
-                {
-                    text: "沒有，我很少看這些的",
-                    score: -2
-                }
+                { text: "有看到重點那幾則，你昨天心情不錯。", score: 3 },
+                { text: "我每一秒都在看，因為你是我的全世界。", score: -2 },
+                { text: "沒看。", score: -1 }
             ]
         },
         {
             text: "咱們什麼時候結婚呢？",
             options: [
-                {
-                    text: "我一直在等妳說好呢！只要妳願意，我隨時都準備好！",
-                    score: 3
-                },
-                {
-                    text: "還早啦，我們再考慮考慮",
-                    score: -1
-                },
-                {
-                    text: "我還沒想好呢...",
-                    score: -2
-                }
+                { text: "我們把時間、財務、共識談清楚，再定時間。", score: 3 },
+                { text: "現在立刻結，我馬上去買戒指昭告天下！", score: -2 },
+                { text: "不要談這個。", score: -2 }
             ]
         },
         {
             text: "你有沒有想過和我一起的未來？",
             options: [
-                {
-                    text: "一直在想呢！你的未來就是我的未來，我想和你一起走過每一天！",
-                    score: 3
-                },
-                {
-                    text: "想是想啦，但還要看機會",
-                    score: 0
-                },
-                {
-                    text: "別問這麼沉重的問題啦...",
-                    score: -2
-                }
+                { text: "有，包含住哪、工作安排和生活分工。", score: 3 },
+                { text: "我每天都幻想你穿婚紗到 80 歲，浪漫到宇宙盡頭。", score: -2 },
+                { text: "以後再說。", score: -1 }
             ]
         },
         {
             text: "你是真的愛我嗎？",
             options: [
-                {
-                    text: "當然愛你！你對我來說是最特別的，我願意為你做任何事！",
-                    score: 3
-                },
-                {
-                    text: "應該吧，我們在一起這麼久了",
-                    score: -1
-                },
-                {
-                    text: "我...我不太會表達...",
-                    score: -2
-                }
+                { text: "是，我會用行動讓你感受到。", score: 3 },
+                { text: "愛爆，我可以為你跟世界對抗、連命都給你。", score: -3 },
+                { text: "不知道。", score: -2 }
             ]
         },
         {
             text: "你有沒有後悔跟我在一起？",
             options: [
-                {
-                    text: "我只會後悔沒有更早遇到你，哪來後悔跟你在一起！",
-                    score: 3
-                },
-                {
-                    text: "是的，有時候後悔",
-                    score: -3
-                },
-                {
-                    text: "沒有後悔過啦",
-                    score: 0
-                }
+                { text: "沒有；有摩擦就拿出來談，不用靠猜。", score: 3 },
+                { text: "我後悔沒早點遇到你 500 年。", score: -1 },
+                { text: "有時會。", score: -3 }
             ]
         },
         {
             text: "你前任比較好還是我比較好？",
             options: [
-                {
-                    text: "沒有可比性，因為我現在愛的人是你，其他人都不重要。",
-                    score: 3
-                },
-                {
-                    text: "你比較好，但她也不差",
-                    score: -2
-                },
-                {
-                    text: "各有優缺點吧",
-                    score: -1
-                }
+                { text: "不同人沒必要比較，我選擇的是現在的你。", score: 3 },
+                { text: "你完勝，她完全不值一提。", score: -2 },
+                { text: "都差不多。", score: -2 }
             ]
         },
         {
             text: "如果有更漂亮的人喜歡你怎麼辦？",
             options: [
-                {
-                    text: "不怎麼辦，我已經有你了，別人再怎樣都不關我的事。",
-                    score: 3
-                },
-                {
-                    text: "我可能會考慮一下",
-                    score: -3
-                },
-                {
-                    text: "那也改變不了我的想法",
-                    score: 1
-                }
+                { text: "我會保持距離，先把界線說清楚。", score: 3 },
+                { text: "我可能會考慮。", score: -3 },
+                { text: "我只看臉，誰美選誰。", score: -3 }
             ]
         },
         {
             text: "你會不會有一天不愛我？",
             options: [
-                {
-                    text: "不會，我只會越來越愛你，因為每天都在更了解你。",
-                    score: 3
-                },
-                {
-                    text: "有可能，人會變",
-                    score: -3
-                },
-                {
-                    text: "我現在不會",
-                    score: -1
-                }
+                { text: "感情要經營，我會持續溝通而不是擺爛。", score: 3 },
+                { text: "我永遠永遠永遠都不會變，宇宙毀滅也不變。", score: -2 },
+                { text: "會，人都會變。", score: -2 }
             ]
         },
         {
             text: "你是不是覺得我很黏？",
             options: [
-                {
-                    text: "不是黏，是在乎，我反而覺得你這樣很可愛。",
-                    score: 3
-                },
-                {
-                    text: "有點啦，有時候很煩",
-                    score: -3
-                },
-                {
-                    text: "還好啦",
-                    score: 0
-                }
+                { text: "我懂你想被重視，我們找彼此舒服的節奏。", score: 3 },
+                { text: "一點都不黏，你 24 小時找我都行。", score: -2 },
+                { text: "有點煩。", score: -3 }
             ]
         },
         {
             text: "如果我很無理取鬧怎麼辦？",
             options: [
-                {
-                    text: "那我就哄你啊，你願意跟我鬧代表你在乎我，我應該珍惜。",
-                    score: 3
-                },
-                {
-                    text: "那就太煩了，我沒辦法",
-                    score: -3
-                },
-                {
-                    text: "我會試著理解你",
-                    score: 0
-                }
+                { text: "先冷靜，再把事情講清楚。", score: 3 },
+                { text: "你怎樣都對，我全部吞下去。", score: -2 },
+                { text: "那就分開。", score: -3 }
             ]
         },
         {
             text: "你朋友說我不好你會怎樣？",
             options: [
-                {
-                    text: "我會先站在你這邊，因為你才是我要一起過日子的人。",
-                    score: 3
-                },
-                {
-                    text: "我會聽他們的意見",
-                    score: -3
-                },
-                {
-                    text: "看情況吧",
-                    score: 0
-                }
+                { text: "我會先了解事實，再自己判斷，不讓外人帶風向。", score: 3 },
+                { text: "我一定跟朋友翻臉，誰說你我就絕交。", score: -2 },
+                { text: "他們說什麼我就信。", score: -3 }
             ]
         },
         {
             text: "你覺得我跟你媽相處得來嗎？",
             options: [
-                {
-                    text: "一定可以，我會在中間幫忙，最重要的是我們兩個好就夠了。",
-                    score: 3
-                },
-                {
-                    text: "可能有點困難",
-                    score: -2
-                },
-                {
-                    text: "慢慢來吧",
-                    score: 0
-                }
+                { text: "需要磨合，我會協調，不讓你一個人扛。", score: 3 },
+                { text: "你一定要完美融入我家，不然不行。", score: -3 },
+                { text: "應該吧，順其自然。", score: 0 }
             ]
         },
         {
             text: "你是不是覺得我很任性？",
             options: [
-                {
-                    text: "不是任性，是你有自己的想法，我反而覺得很真實。",
-                    score: 3
-                },
-                {
-                    text: "有點，脾氣很任性",
-                    score: -3
-                },
-                {
-                    text: "還能接受",
-                    score: 0
-                }
+                { text: "有情緒很正常，我們把需求講清楚就好。", score: 3 },
+                { text: "你一點都不任性，你是最完美的天使。", score: -2 },
+                { text: "對，很任性。", score: -3 }
             ]
         },
         {
             text: "你會不會覺得我很麻煩？",
             options: [
-                {
-                    text: "不會，你的事情對我來說都很重要，不叫麻煩。",
-                    score: 3
-                },
-                {
-                    text: "有時候確實挺麻煩的",
-                    score: -3
-                },
-                {
-                    text: "還好啦",
-                    score: 0
-                }
+                { text: "遇到問題就一起處理，不用貼麻煩標籤。", score: 3 },
+                { text: "你完全不麻煩，你叫我做什麼我都秒做。", score: -2 },
+                { text: "超麻煩。", score: -3 }
             ]
         },
         {
             text: "如果我們吵架你會先低頭嗎？",
             options: [
-                {
-                    text: "如果是為了你，我可以先低頭，因為我不想失去你。",
-                    score: 3
-                },
-                {
-                    text: "要看誰對誰錯",
-                    score: -2
-                },
-                {
-                    text: "我們會一起解決",
-                    score: 0
-                }
+                { text: "我會先讓情緒降下來，再主動談。", score: 3 },
+                { text: "我永遠先跪，因為你永遠是對的。", score: -3 },
+                { text: "看我心情。", score: -2 }
             ]
         },
         {
             text: "你是不是比較愛自己？",
             options: [
-                {
-                    text: "我當然也要顧自己，但在感情裡我會把你放很重要的位置。",
-                    score: 2
-                },
-                {
-                    text: "是啊，我先顧自己",
-                    score: -3
-                },
-                {
-                    text: "我盡量平衡",
-                    score: 0
-                }
+                { text: "我會先照顧好自己，也會好好經營我們。", score: 3 },
+                { text: "我只愛你，我自己完全不重要。", score: -2 },
+                { text: "對，我只顧自己。", score: -3 }
             ]
         },
         {
             text: "如果我哭你會怎樣？",
             options: [
-                {
-                    text: "先抱你，再哄你，等你不哭了再慢慢聽你說。",
-                    score: 3
-                },
-                {
-                    text: "我也不知道該怎樣",
-                    score: -2
-                },
-                {
-                    text: "我會安慰你",
-                    score: 1
-                }
+                { text: "先陪你穩定下來，再聽你想說的。", score: 3 },
+                { text: "我會哭得比你更大聲，證明我更愛你。", score: -2 },
+                { text: "你自己冷靜。", score: -3 }
             ]
         },
         {
             text: "我生病了，該怎麼辦啊？",
             options: [
-                {
-                    text: "乖乖躺著休息，別亂動。我去幫你買清粥和藥，進來之前我會先敲門。",
-                    score: 3
-                },
-                {
-                    text: "多喝熱水",
-                    score: -3
-                },
-                {
-                    text: "要不要去醫院？",
-                    score: 0
-                }
+                { text: "先量體溫、補水休息，必要時陪你看醫生。", score: 3 },
+                { text: "多喝熱水，其他我不管。", score: -3 },
+                { text: "我幫你發文祈福，一定會好。", score: -2 }
             ]
         },
         {
             text: "我和你前女友同時掉進糞坑，你會怎樣？",
             options: [
-                {
-                    text: "你是我的初戀，我沒有前女友這種東西。我只會救你，讓我們趕快離開這裡！",
-                    score: 3
-                },
-                {
-                    text: "肯定先救你啊",
-                    score: 1
-                },
-                {
-                    text: "這是個假題目，不現實",
-                    score: 0
-                }
+                { text: "先確保人身安全，再叫救援，不演八點檔。", score: 3 },
+                { text: "我只救你，因為你是宇宙唯一真愛。", score: -2 },
+                { text: "我先拍照再說。", score: -3 }
             ]
         },
         {
             text: "你知道你錯在哪兒了嗎？",
             options: [
-                {
-                    text: "我沒做錯什麼啊，是你無緣無故在生氣嗎？我理解你，但能解釋一下嗎？",
-                    score: 2
-                },
-                {
-                    text: "不知道啊，你告訴我？",
-                    score: -2
-                },
-                {
-                    text: "我沒錯啊，你在無理取鬧！",
-                    score: -3
-                }
+                { text: "我想先聽你在意的點，再確認我忽略了什麼。", score: 3 },
+                { text: "我錯在太愛你，愛到失去自我。", score: -2 },
+                { text: "你先道歉。", score: -3 }
             ]
         },
         {
             text: "如果我們分手了，你可以把這個送給我嗎？",
             options: [
-                {
-                    text: "我們不會分手的，而且你現在想要的話，我立刻就給你。",
-                    score: 3
-                },
-                {
-                    text: "可以啊，到時候再說",
-                    score: 0
-                },
-                {
-                    text: "不給，這是我最喜歡的東西",
-                    score: -2
-                }
+                { text: "到時候再談，我會尊重彼此感受和界線。", score: 3 },
+                { text: "你現在要什麼我都給，房子都給你。", score: -2 },
+                { text: "不可能，想都別想。", score: -2 }
             ]
         },
         {
             text: "你會偶爾想起前女友嗎？",
             options: [
-                {
-                    text: "沒有，我眼裡只有你，過去都過去了。",
-                    score: 3
-                },
-                {
-                    text: "有時候會想起，但那都是回憶",
-                    score: -2
-                },
-                {
-                    text: "會啊，有時還是會想念",
-                    score: -3
-                }
+                { text: "偶爾想起是記憶，不代表想回頭。", score: 3 },
+                { text: "我完全失憶了，我的人生從認識你才開始。", score: -2 },
+                { text: "常常想。", score: -3 }
             ]
         },
         {
             text: "我跟你前女友相比，誰更好？",
             options: [
-                {
-                    text: "你好得多啊！根本沒可比性，你是獨一無二的。",
-                    score: 3
-                },
-                {
-                    text: "差不多吧",
-                    score: -2
-                },
-                {
-                    text: "各有各的優點",
-                    score: -1
-                }
+                { text: "你是你，她是她；比較沒有意義。", score: 3 },
+                { text: "你好一萬倍，她根本不配。", score: -2 },
+                { text: "她比較好。", score: -3 }
             ]
         },
         {
             text: "如果我們分手了，你會把我追回來嗎？",
             options: [
-                {
-                    text: "絕對會！我一輩子都不會放棄你，除非你真的不要我。",
-                    score: 3
-                },
-                {
-                    text: "看情況吧，要看是誰的錯",
-                    score: -2
-                },
-                {
-                    text: "分手就分手吧，各走各的路",
-                    score: -3
-                }
+                { text: "先釐清原因；值得修復我會努力，不勉強。", score: 3 },
+                { text: "我會跪著追到天涯海角，永遠不放手。", score: -2 },
+                { text: "不會，下一位。", score: -3 }
             ]
         },
         {
             text: "你有想像過我們會有分手的一天嗎？",
             options: [
-                {
-                    text: "沒有，我對我們很有信心，我們會一直在一起的。",
-                    score: 3
-                },
-                {
-                    text: "想過，但只是防患於未然",
-                    score: 0
-                },
-                {
-                    text: "想過，人都會變心",
-                    score: -3
-                }
+                { text: "想過風險，所以更重視溝通和經營。", score: 3 },
+                { text: "不可能，我們是命中註定到宇宙盡頭。", score: -2 },
+                { text: "早就準備好了。", score: -3 }
             ]
         },
         {
             text: "你相信男女之間有純友誼嗎？",
             options: [
-                {
-                    text: "不相信，至少對我來說沒有。我眼裡只能看見你。",
-                    score: 3
-                },
-                {
-                    text: "有，但我周圍沒有",
-                    score: 0
-                },
-                {
-                    text: "有，我有很多異性朋友",
-                    score: -3
-                }
+                { text: "我相信有，但界線要清楚。", score: 3 },
+                { text: "我連和異性說話都不敢，因為我只屬於你。", score: -2 },
+                { text: "不重要，我想怎樣就怎樣。", score: -2 }
             ]
         },
         {
             text: "你會介意我在你之前有過別的人嗎？",
             options: [
-                {
-                    text: "不會介意，我只在乎的是從現在開始，你和我的未來。",
-                    score: 3
-                },
-                {
-                    text: "有點介意，但能接受",
-                    score: 0
-                },
-                {
-                    text: "會，這說明你很隨便",
-                    score: -3
-                }
+                { text: "不介意過去，我更看重現在怎麼相處。", score: 3 },
+                { text: "我只要想到就崩潰，但我還是會硬撐。", score: -2 },
+                { text: "會，這很扣分。", score: -3 }
             ]
         },
         {
             text: "其實你到底喜歡我哪一點？",
             options: [
-                {
-                    text: "我喜歡你的所有，包括優點和缺點，因為那都是你，都是獨一無二的你。",
-                    score: 3
-                },
-                {
-                    text: "喜歡你的性格和顏值",
-                    score: 1
-                },
-                {
-                    text: "就是喜歡，說不出來",
-                    score: 0
-                }
+                { text: "你做事有主見、相處直接，這很吸引我。", score: 3 },
+                { text: "你全身上下每一根頭髮都完美無瑕，像神蹟。", score: -2 },
+                { text: "就外表。", score: -2 }
             ]
         },
         {
             text: "如果哪天你愛上別人了，會告訴我嗎？",
             options: [
-                {
-                    text: "這不可能發生的。但如果真有無法控制的變化，我會誠實告訴你。",
-                    score: 3
-                },
-                {
-                    text: "會的，我們要坦誠相待",
-                    score: 1
-                },
-                {
-                    text: "可能不會告訴你",
-                    score: -3
-                }
+                { text: "會，我會誠實說清楚並負責任收尾。", score: 3 },
+                { text: "不會有那天，我的愛濃度永遠 100%。", score: -2 },
+                { text: "不會，省麻煩。", score: -3 }
             ]
         }
     ];
     
+    const PERSONALITY_META = {
+        pragmatic: {
+            label: "務實獨立型",
+            description: "重視真誠、邏輯與界線，討厭過度浮誇。",
+            rule: "平實理性高分，油膩情話低分"
+        },
+        romantic: {
+            label: "浪漫感性型",
+            description: "喜歡被重視與情緒價值，甜度越高越容易加分。",
+            rule: "浪漫告白高分，太冷靜會扣分"
+        },
+        chill: {
+            label: "隨和鬆弛型",
+            description: "偏好輕鬆自然，不喜歡控制或情緒勒索。",
+            rule: "簡潔自然高分，極端發言低分"
+        }
+    };
+
+    const questionBanks = {
+        pragmatic: pragmaticQuestions,
+        romantic: buildPersonalityBank(pragmaticQuestions, "romantic"),
+        chill: buildPersonalityBank(pragmaticQuestions, "chill")
+    };
+
+    let selectedPersonality = null;
+    let activeQuestions = [];
+    let seenQuestionIndexes = new Set();
+
     // 遊戲狀態
     let gameState = {
         score: GAME_CONFIG.maxScore,
         isGameOver: false,
         currentQuestion: null,
+        currentQuestionIndex: null,
         questionActive: false,
-        scrollPosition: 0
+        scrollPosition: 0,
+        hasStarted: false
     };
     
     // 初始化遊戲
     function initGame() {
         updateScoreDisplay();
         adjustBackgroundScale();
-        scheduleNextQuestion();
         setupKeyboardControls();
+        renderPersonalityCards();
+    }
+
+    function renderPersonalityCards() {
+        const grid = document.getElementById('personalityGrid');
+        grid.innerHTML = '';
+
+        Object.entries(PERSONALITY_META).forEach(([id, info]) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'personality-card';
+            card.innerHTML = `
+                <div class="personality-name">${info.label}</div>
+                <div class="personality-desc">${info.description}</div>
+                <div class="personality-rule">規則：秘密</div>
+            `;
+            card.addEventListener('click', () => startGameWithPersonality(id));
+            grid.appendChild(card);
+        });
+    }
+
+    function startGameWithPersonality(personalityId) {
+        selectedPersonality = personalityId;
+        activeQuestions = questionBanks[personalityId];
+        seenQuestionIndexes = new Set();
+        gameState.hasStarted = true;
+        gameState.currentQuestionIndex = null;
+
+        document.getElementById('personalityDisplay').textContent = PERSONALITY_META[personalityId].label;
+        document.getElementById('startModal').classList.add('hidden');
+        updateQuestionProgress();
+        updateQuestionTimerDisplay('3');
+        scheduleNextQuestion();
+    }
+
+    function updateQuestionProgress() {
+        const tested = seenQuestionIndexes.size;
+        const total = activeQuestions.length;
+        const untested = Math.max(total - tested, 0);
+
+        document.getElementById('testedDisplay').textContent = String(tested);
+        document.getElementById('untestedDisplay').textContent = String(untested);
+    }
+
+    function updateQuestionTimerDisplay(value) {
+        document.getElementById('questionTimerDisplay').textContent = String(value);
+    }
+
+    function buildPersonalityBank(baseQuestions, personalityType) {
+        const scoreMap = {
+            romantic: { 3: -2, 2: -1, 1: 1, 0: 0, '-1': 2, '-2': 3, '-3': 3 },
+            chill: { 3: 2, 2: 1, 1: 1, 0: 3, '-1': 1, '-2': -1, '-3': -3 }
+        };
+
+        return baseQuestions.map((question) => ({
+            text: question.text,
+            options: question.options.map((option) => ({
+                text: option.text,
+                score: scoreMap[personalityType][option.score]
+            }))
+        }));
     }
     
     // 調整背景縮放以填滿屏幕
@@ -999,7 +919,7 @@
     
     // 排程下一個問題
     function scheduleNextQuestion() {
-        if (gameState.isGameOver) return;
+        if (gameState.isGameOver || !gameState.hasStarted) return;
         
         setTimeout(() => {
             if (!gameState.isGameOver) {
@@ -1010,10 +930,19 @@
     
     // 顯示問題
     function showQuestion() {
+        if (!activeQuestions.length) return;
+
         // 隨機選擇一個問題
-        const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+        const randomIndex = Math.floor(Math.random() * activeQuestions.length);
+        const randomQuestion = activeQuestions[randomIndex];
         gameState.currentQuestion = randomQuestion;
+        gameState.currentQuestionIndex = randomIndex;
         gameState.questionActive = true;
+        const shuffledOptions = [...randomQuestion.options];
+        shuffleOptions(shuffledOptions);
+
+        seenQuestionIndexes.add(randomIndex);
+        updateQuestionProgress();
         
         // 更新問題文本
         document.getElementById('questionText').textContent = randomQuestion.text;
@@ -1022,7 +951,7 @@
         const optionsContainer = document.getElementById('optionsContainer');
         optionsContainer.innerHTML = '';
         
-        randomQuestion.options.forEach((option, index) => {
+        shuffledOptions.forEach((option, index) => {
             const optionDiv = document.createElement('div');
             optionDiv.className = 'option';
             optionDiv.innerHTML = `
@@ -1039,15 +968,23 @@
         // 設置倒計時
         startQuestionTimer();
     }
+
+    // Fisher-Yates 洗牌
+    function shuffleOptions(options) {
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+    }
     
     // 問題倒計時 - 改為3秒答題時間
     function startQuestionTimer() {
         let timeLeft = 3;
-        document.getElementById('timerDisplay').textContent = timeLeft;
+        updateQuestionTimerDisplay(timeLeft);
         
         const timerInterval = setInterval(() => {
             timeLeft--;
-            document.getElementById('timerDisplay').textContent = timeLeft;
+            updateQuestionTimerDisplay(timeLeft);
             
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
@@ -1102,7 +1039,7 @@
     function hideQuestion() {
         document.getElementById('questionModal').classList.remove('active');
         // 重置倒數計時器顯示為3秒
-        document.getElementById('timerDisplay').textContent = '3';
+        updateQuestionTimerDisplay('3');
     }
     
     // 更新分數顯示
@@ -1123,12 +1060,13 @@
     // 遊戲結束
     function endGame() {
         gameState.isGameOver = true;
+        const personalityLabel = selectedPersonality ? PERSONALITY_META[selectedPersonality].label : '未指定';
         
         document.getElementById('finalScore').textContent = `最終好感度: ${gameState.score} / 10`;
         document.getElementById('gameOverMessage').textContent = 
             gameState.score < 3 
-                ? "嗯...你說的話似乎激怒了她😭，恭喜你成功踩雷！下次要更小心啦！" 
-                : "遊戲結束了！你的回答讓她很失望💔";
+                ? `模式：${personalityLabel}。嗯...你說的話似乎激怒了她😭，恭喜你成功踩雷！下次要更小心啦！`
+                : `模式：${personalityLabel}。遊戲結束了！你的回答讓她很失望💔`;
         
         document.getElementById('gameOverModal').classList.add('active');
     }
