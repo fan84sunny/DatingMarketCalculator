@@ -859,7 +859,7 @@
         document.getElementById('personalityDisplay').textContent = PERSONALITY_META[personalityId].label;
         document.getElementById('startModal').classList.add('hidden');
         updateQuestionProgress();
-        updateQuestionTimerDisplay('3');
+        updateQuestionTimerDisplay(getQuestionDurationSeconds());
         scheduleNextQuestion();
     }
 
@@ -874,6 +874,10 @@
 
     function updateQuestionTimerDisplay(value) {
         document.getElementById('questionTimerDisplay').textContent = String(value);
+    }
+
+    function getQuestionDurationSeconds() {
+        return Math.max(1, Math.ceil(GAME_CONFIG.questionDuration / 1000));
     }
 
     function buildPersonalityBank(baseQuestions, personalityType) {
@@ -985,9 +989,9 @@
         }
     }
     
-    // 問題倒計時 - 改為3秒答題時間
+    // 問題倒計時
     function startQuestionTimer() {
-        let timeLeft = 3;
+        let timeLeft = getQuestionDurationSeconds();
         updateQuestionTimerDisplay(timeLeft);
         
         const timerInterval = setInterval(() => {
@@ -1046,8 +1050,7 @@
     // 隱藏問題
     function hideQuestion() {
         document.getElementById('questionModal').classList.remove('active');
-        // 重置倒數計時器顯示為3秒
-        updateQuestionTimerDisplay('3');
+        updateQuestionTimerDisplay(getQuestionDurationSeconds());
     }
     
     // 更新分數顯示
