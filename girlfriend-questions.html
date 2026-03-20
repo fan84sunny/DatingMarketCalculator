@@ -3,294 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>女友送命題 - 考驗一下你們的默契</title>
+    <title>親密關係經營力 Intimate Relationship Connection Scale</title>
     <style>
-        :root { --primary: #ec4899; --secondary: #1e293b; --bg: #f8fafc; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--secondary); line-height: 1.6; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        h1 { text-align: center; color: var(--secondary); margin-bottom: 10px; font-weight: 800; }
-        p.subtitle { text-align: center; color: #64748b; margin-bottom: 40px; }
-        
-        .back-link { display: inline-block; margin-bottom: 20px; }
-        .back-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        :root {
+            --bg: #eef3f7;
+            --card: #ffffff;
+            --text: #16324f;
+            --muted: #5b6f84;
+            --line: #d7e1ea;
+            --accent: #2f80ed;
+            --accent-soft: #e7f1ff;
+            --success: #0f766e;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            background: radial-gradient(circle at top right, #d9ebff 0%, var(--bg) 45%, #f4f7fb 100%);
+            color: var(--text);
+            line-height: 1.65;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+        }
+
+        .container {
+            width: min(980px, 100%);
+            margin: 0 auto;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 24px 60px rgba(22, 50, 79, 0.12);
+        }
+
+        .back-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
         .back-link a:hover { text-decoration: underline; }
-        
-        .category-selector { margin-bottom: 30px; }
-        .category-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
-        .category-btn { padding: 10px 20px; border: 2px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .category-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .category-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        
-        .question-card { background: #f8fafc; padding: 30px; border-radius: 12px; margin-bottom: 20px; display: none; }
-        .question-card.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .question-number { color: var(--primary); font-weight: bold; font-size: 0.9rem; margin-bottom: 10px; }
-        .question-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; color: var(--secondary); }
-        
-        .options { display: flex; flex-direction: column; gap: 12px; }
-        .option { padding: 15px 20px; background: white; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        .option:hover { border-color: var(--primary); background: #fdf2f8; }
-        .option.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        
-        .navigation { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; gap: 10px; }
-        button { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        button:hover { background: #be185d; transform: translateY(-1px); }
-        button:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .progress { text-align: center; color: #64748b; font-weight: 600; }
-        
-        .result-summary { background: #fdf2f8; padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary); display: none; }
-        .result-summary.show { display: block; }
+
+        h1 {
+            font-size: 1.9rem;
+            margin: 8px 0 4px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .progress {
+            margin-bottom: 16px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .question {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+            background: #fcfdff;
+        }
+
+        .question h2 {
+            margin: 0 0 8px;
+            font-size: 1.15rem;
+            line-height: 1.45;
+        }
+
+        .question-note {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            display: grid;
+            gap: 8px;
+        }
+
+        .option-item {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .option-item:hover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .option-item label {
+            display: flex;
+            gap: 10px;
+            cursor: pointer;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .measure {
+            margin-top: 10px;
+            font-size: 0.92rem;
+            color: #1f4f85;
+            font-weight: 700;
+        }
+
+        .submit-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 24px;
+            color: #fff;
+            background: linear-gradient(135deg, #2f80ed, #246cd2);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover { filter: brightness(1.05); }
+
+        .hint {
+            font-size: 0.93rem;
+            color: var(--muted);
+        }
+
+        .result {
+            margin-top: 28px;
+            border-top: 1px dashed var(--line);
+            padding-top: 22px;
+            display: none;
+        }
+
+        .result.show { display: block; }
+
+        .result h2 { margin: 0 0 8px; }
+
+        .summary {
+            background: #ecfeff;
+            border: 1px solid #bfeaf1;
+            border-left: 4px solid var(--success);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .score-item {
+            background: #f8fbff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            text-align: center;
+            padding: 10px 8px;
+        }
+
+        .analysis-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            background: #fff;
+        }
+
+        .analysis-card.highlight {
+            border-color: #55a2ff;
+            background: #f2f8ff;
+        }
+
+        .analysis-card h3 {
+            margin: 0 0 8px;
+            font-size: 1.1rem;
+        }
+
+        .analysis-card p {
+            margin: 6px 0;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 14px; }
+            .container { padding: 18px; }
+            h1 { font-size: 1.45rem; }
+            .score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .submit-row { flex-direction: column; align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="back-link"><a href="index.html">← 返回首頁</a></div>
-    
-    <h1>💕 女友送命題</h1>
-    <p class="subtitle">考驗一下你們的默契 ✨</p>
 
-    <div class="category-selector">
-        <p style="font-weight: 600; margin-bottom: 15px;">選擇題庫：</p>
-        <div class="category-buttons">
-            <button class="category-btn active" onclick="switchCategory('couple')">情侶題</button>
-            <button class="category-btn" onclick="switchCategory('personality')">性格題</button>
-            <button class="category-btn" onclick="switchCategory('love')">愛情觀</button>
-            <button class="category-btn" onclick="switchCategory('future')">未來規劃</button>
-        </div>
-    </div>
+    <h1>親密關係經營力 (Intimate Relationship Connection Scale)</h1>
+    <p class="subtitle">本測驗沒有標準答案，而是呈現你在關係中的運作模式。</p>
 
-    <!-- 情侶題 -->
-    <div id="couple-questions" class="category">
-        <div class="question-card active">
-            <div class="question-number">問題 1/3</div>
-            <div class="question-text">第一次約會打算去哪裡？</div>
+    <form id="quizForm">
+        <div class="progress">已完成 <span id="answeredCount">0</span> / 6 題</div>
+
+        <section class="question">
+            <h2>💙【互動題】什麼樣的互動最讓你「明確感受到被愛」？</h2>
+            <div class="question-note">（請選最有感覺的選項）</div>
             <div class="options">
-                <div class="option" onclick="selectOption(this)">餐廳吃飯</div>
-                <div class="option" onclick="selectOption(this)">看電影</div>
-                <div class="option" onclick="selectOption(this)">戶外活動</div>
+                <div class="option-item"><label><input type="radio" name="q1" value="affirmation">💬 對方用言語表達肯定與欣賞</label></div>
+                <div class="option-item"><label><input type="radio" name="q1" value="time">⏳ 對方願意花專注時間陪伴我</label></div>
+                <div class="option-item"><label><input type="radio" name="q1" value="gift">🎁 對方準備禮物或小驚喜</label></div>
+                <div class="option-item"><label><input type="radio" name="q1" value="service">🛠 對方主動為我做事、照顧我</label></div>
+                <div class="option-item"><label><input type="radio" name="q1" value="touch">🤝 對方有親密的肢體接觸</label></div>
             </div>
-        </div>
+            <div class="measure">🔍 測量面向：親密需求（Love Language）</div>
+        </section>
 
-        <div class="question-card">
-            <div class="question-number">問題 2/3</div>
-            <div class="question-text">生日禮物最想收到什麼？</div>
+        <section class="question">
+            <h2>💬【陪伴題】當與對方有摩擦時，你會如何回應？</h2>
+            <div class="question-note">（請選最常出現的反應）</div>
             <div class="options">
-                <div class="option" onclick="selectOption(this)">手寫卡片</div>
-                <div class="option" onclick="selectOption(this)">精心挑選的禮物</div>
-                <div class="option" onclick="selectOption(this)">一起去旅行</div>
+                <div class="option-item"><label><input type="radio" name="q2" value="1">💞 同理對方狀態，並表達自己的需求，共同尋找平衡</label></div>
+                <div class="option-item"><label><input type="radio" name="q2" value="2">⏸ 先暫停對話，整理情緒後再回來溝通</label></div>
+                <div class="option-item"><label><input type="radio" name="q2" value="3">⚡ 當下立即溝通處理，希望問題盡快解決</label></div>
+                <div class="option-item"><label><input type="radio" name="q2" value="4">🔥 直接表達不滿或情緒，期待對方理解或改變</label></div>
+                <div class="option-item"><label><input type="radio" name="q2" value="5">🧊 選擇不回應或轉移話題，避免衝突</label></div>
             </div>
-        </div>
+            <div class="measure">🔍 測量面向：情感回應力（ARE）＋衝突處理模式</div>
+        </section>
 
-        <div class="question-card">
-            <div class="question-number">問題 3/3</div>
-            <div class="question-text">最喜歡對方的什麼？</div>
+        <section class="question">
+            <h2>⏰【生活節奏題】你理想中的親密關係互動頻率是？</h2>
+            <div class="question-note">（請選最符合你的狀態）</div>
             <div class="options">
-                <div class="option" onclick="selectOption(this)">幽默感</div>
-                <div class="option" onclick="selectOption(this)">溫柔體貼</div>
-                <div class="option" onclick="selectOption(this)">上進心</div>
+                <div class="option-item"><label><input type="radio" name="q3" value="1">📅 幾乎每天都希望有穩定交流與陪伴</label></div>
+                <div class="option-item"><label><input type="radio" name="q3" value="2">🌿 平日各自生活，但每天仍有基本互動</label></div>
+                <div class="option-item"><label><input type="radio" name="q3" value="3">🌙 不需要每天聯絡，重質不重量</label></div>
+                <div class="option-item"><label><input type="radio" name="q3" value="4">🧍‍♀️ 需要較多個人空間與時間</label></div>
+                <div class="option-item"><label><input type="radio" name="q3" value="5">🌊 視狀態彈性調整，有時密集有時獨處</label></div>
             </div>
-        </div>
-    </div>
+            <div class="measure">🔍 測量面向：關係節奏（Relational Rhythm）＋依附需求強度</div>
+        </section>
 
-    <!-- 性格題 -->
-    <div id="personality-questions" class="category" style="display: none;">
-        <div class="question-card active">
-            <div class="question-number">問題 1/3</div>
-            <div class="question-text">你是屬於哪種性格類型？</div>
+        <section class="question">
+            <h2>⏰【生活節奏－延伸題】當對方沒有照你習慣的頻率互動時，你會：</h2>
+            <div class="question-note">（請選最接近的反應）</div>
             <div class="options">
-                <div class="option" onclick="selectOption(this)">內向沉靜型</div>
-                <div class="option" onclick="selectOption(this)">外向活潑型</div>
-                <div class="option" onclick="selectOption(this)">平衡綜合型</div>
+                <div class="option-item"><label><input type="radio" name="q4" value="1">💬 主動溝通需求，調整彼此節奏</label></div>
+                <div class="option-item"><label><input type="radio" name="q4" value="2">👀 先觀察一段時間，再決定是否提出</label></div>
+                <div class="option-item"><label><input type="radio" name="q4" value="3">🔍 開始感到不安，會想確認對方的想法</label></div>
+                <div class="option-item"><label><input type="radio" name="q4" value="4">🧊 告訴自己不要依賴，降低互動需求</label></div>
+                <div class="option-item"><label><input type="radio" name="q4" value="5">🚪 直接抽離或降低投入</label></div>
             </div>
-        </div>
+            <div class="measure">🔍 測量面向：生活節奏落差下的反應模式（節奏調適力＋依附反應）</div>
+        </section>
 
-        <div class="question-card">
-            <div class="question-number">問題 2/3</div>
-            <div class="question-text">面對衝突時的反應？</div>
+        <section class="question">
+            <h2>❤️【愛情觀】你認為一段理想關係最重要的是什麼？</h2>
+            <div class="question-note">（請選最接近的選項）</div>
             <div class="options">
-                <div class="option" onclick="selectOption(this)">冷靜理性討論</div>
-                <div class="option" onclick="selectOption(this)">需要時間冷靜</div>
-                <div class="option" onclick="selectOption(this)">直接表達想法</div>
+                <div class="option-item"><label><input type="radio" name="q5" value="1">🌱 彼此支持與共同成長</label></div>
+                <div class="option-item"><label><input type="radio" name="q5" value="2">🧡 穩定陪伴與情感安全感</label></div>
+                <div class="option-item"><label><input type="radio" name="q5" value="3">🔥 心動與情感強烈的交流</label></div>
+                <div class="option-item"><label><input type="radio" name="q5" value="4">🧩 保有自我，同時維持關係</label></div>
+                <div class="option-item"><label><input type="radio" name="q5" value="5">⚖️ 理解與尊重彼此差異</label></div>
             </div>
-        </div>
+            <div class="measure">🔍 測量面向：關係價值觀（Relationship Beliefs）</div>
+        </section>
 
-        <div class="question-card">
-            <div class="question-number">問題 3/3</div>
-            <div class="question-text">更傾向於哪種休閒方式？</div>
+        <section class="question">
+            <h2>🔮【未來規劃】你對關係未來的期待較接近？</h2>
+            <div class="question-note">（請選最符合你的想法）</div>
             <div class="options">
-                <div class="option" onclick="selectOption(this)">宅家放鬆</div>
-                <div class="option" onclick="selectOption(this)">外出探險</div>
-                <div class="option" onclick="selectOption(this)">社交聚會</div>
+                <div class="option-item"><label><input type="radio" name="q6" value="1">🏡 期待穩定長期發展，朝共同生活前進</label></div>
+                <div class="option-item"><label><input type="radio" name="q6" value="2">🧭 順其自然發展，不急著設定關係目標</label></div>
+                <div class="option-item"><label><input type="radio" name="q6" value="3">💫 重視當下相處品質，未來再說</label></div>
+                <div class="option-item"><label><input type="radio" name="q6" value="4">🛤 有自己的生活規劃，關係需能配合</label></div>
+                <div class="option-item"><label><input type="radio" name="q6" value="5">🤝 希望一起規劃未來，建立共同方向</label></div>
             </div>
-        </div>
-    </div>
+            <div class="measure">🔍 測量面向：未來導向（Commitment Orientation）</div>
+        </section>
 
-    <!-- 愛情觀題 -->
-    <div id="love-questions" class="category" style="display: none;">
-        <div class="question-card active">
-            <div class="question-number">問題 1/3</div>
-            <div class="question-text">認為愛情最重要的要素？</div>
-            <div class="options">
-                <div class="option" onclick="selectOption(this)">信任與坦誠</div>
-                <div class="option" onclick="selectOption(this)">互相吸引</div>
-                <div class="option" onclick="selectOption(this)">共同目標</div>
-            </div>
+        <div class="submit-row">
+            <button type="submit">送出並查看結果</button>
+            <div class="hint">系統會在背景即時計分，送出後自動跳轉到結果區塊。</div>
         </div>
+    </form>
 
-        <div class="question-card">
-            <div class="question-number">問題 2/3</div>
-            <div class="question-text">對長期關係的期許？</div>
-            <div class="options">
-                <div class="option" onclick="selectOption(this)">走入婚姻殿堂</div>
-                <div class="option" onclick="selectOption(this)">享受當下感受</div>
-                <div class="option" onclick="selectOption(this)">順其自然發展</div>
-            </div>
-        </div>
-
-        <div class="question-card">
-            <div class="question-number">問題 3/3</div>
-            <div class="question-text">最難以接受的伴侶行為？</div>
-            <div class="options">
-                <div class="option" onclick="selectOption(this)">說謊不誠實</div>
-                <div class="option" onclick="selectOption(this)">冷漠不在乎</div>
-                <div class="option" onclick="selectOption(this)">控制欲太強</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 未來規劃題 -->
-    <div id="future-questions" class="category" style="display: none;">
-        <div class="question-card active">
-            <div class="question-number">問題 1/3</div>
-            <div class="question-text">5年內的人生目標？</div>
-            <div class="options">
-                <div class="option" onclick="selectOption(this)">事業成就</div>
-                <div class="option" onclick="selectOption(this)">家庭幸福</div>
-                <div class="option" onclick="selectOption(this)">自我成長</div>
-            </div>
-        </div>
-
-        <div class="question-card">
-            <div class="question-number">問題 2/3</div>
-            <div class="question-text">理想的生活方式？</div>
-            <div class="options">
-                <div class="option" onclick="selectOption(this)">城市繁華生活</div>
-                <div class="option" onclick="selectOption(this)">鄉村寧靜生活</div>
-                <div class="option" onclick="selectOption(this)">到處旅行探險</div>
-            </div>
-        </div>
-
-        <div class="question-card">
-            <div class="question-number">問題 3/3</div>
-            <div class="question-text">對於有小孩的想法？</div>
-            <div class="options">
-                <div class="option" onclick="selectOption(this)">一定要有孩子</div>
-                <div class="option" onclick="selectOption(this)">可有可無</div>
-                <div class="option" onclick="selectOption(this)">暫時還沒想好</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="result-summary" id="resultSummary">
-        <p style="font-weight: 600; margin-bottom: 10px;">✨ 你的答案已記錄完成！</p>
-        <p style="font-size: 0.95rem;">感謝參加，期待看到你和對方的默契程度喔 💕</p>
-    </div>
-
-    <div class="navigation">
-        <button onclick="prevQuestion()" id="prevBtn" disabled>← 上一題</button>
-        <div class="progress">
-            <span id="currentQuestion">1</span> / <span id="totalQuestions">3</span>
-        </div>
-        <button onclick="nextQuestion()" id="nextBtn">下一題 →</button>
-    </div>
+    <section class="result" id="resultSection">
+        <h2 id="result">🧠 測驗結果分析｜你的關係運作型</h2>
+        <div class="summary" id="summaryBox"></div>
+        <div class="score-grid" id="scoreGrid"></div>
+        <div class="summary" id="loveLanguageBox"></div>
+        <div class="summary" id="advancedBox"></div>
+        <div id="analysisList"></div>
+    </section>
 </div>
 
 <script>
-    let currentCategory = 'couple';
-    let currentQuestionIndex = 0;
-    const totalQuestions = 3;
+    const TYPE_LABELS = {
+        A: '穩定共創型',
+        B: '高感連結型',
+        C: '穩定平衡型',
+        D: '低頻獨立型',
+        E: '流動觀察型'
+    };
 
-    function switchCategory(category) {
-        // 隱藏所有題庫
-        document.querySelectorAll('.category').forEach(cat => {
-            cat.style.display = 'none';
-        });
-        
-        // 隱藏結果
-        document.getElementById('resultSummary').classList.remove('show');
-        
-        // 顯示選中的題庫
-        document.getElementById(category + '-questions').style.display = 'block';
-        
-        // 更新按鈕狀態
-        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        
-        currentCategory = category;
-        currentQuestionIndex = 0;
-        updateDisplay();
-    }
+    const SCORING_MAP = {
+        q2: { '1': ['A'], '2': ['C', 'D'], '3': ['B'], '4': ['B', 'E'], '5': ['D', 'E'] },
+        q3: { '1': ['B'], '2': ['C'], '3': ['D'], '4': ['D'], '5': ['E'] },
+        q4: { '1': ['A'], '2': ['C', 'E'], '3': ['B'], '4': ['D'], '5': ['E', 'D'] },
+        q5: { '1': ['A'], '2': ['B', 'C'], '3': ['B'], '4': ['D'], '5': ['C', 'A'] },
+        q6: { '1': ['A'], '2': ['E'], '3': ['E', 'B'], '4': ['D'], '5': ['A', 'C'] }
+    };
 
-    function selectOption(element) {
-        const optionsContainer = element.parentElement;
-        optionsContainer.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-        element.classList.add('selected');
-    }
+    const LOVE_LANGUAGE_ANALYSIS = {
+        affirmation: '💬 肯定：情感回應需求高（偏 B）',
+        time: '⏳ 陪伴：穩定需求（偏 A / C）',
+        gift: '🎁 禮物：記憶型連結',
+        service: '🛠 行動：實務支持型（偏 A）',
+        touch: '🤝 接觸：身體連結型（偏 B）'
+    };
 
-    function prevQuestion() {
-        if (currentQuestionIndex > 0) {
-            currentQuestionIndex--;
-            updateDisplay();
+    const TYPE_DETAILS = {
+        A: {
+            title: '💞 ① 穩定共創型（高回應 × 可調節）',
+            trait: '願意同理對方，也能表達自己；面對衝突傾向溝通與協調；能調整節奏找到雙方平衡。',
+            style: '👉 我們一起讓關係變好。重視理解、回應與長期穩定。',
+            blind: '可能過度承擔關係責任，遇到不願溝通的人會很消耗。',
+            match: '適合願意溝通與成長、具備基本情緒回應能力的人。'
+        },
+        B: {
+            title: '🔥 ② 高感連結型（高需求 × 高感受）',
+            trait: '重視情感交流與親密感，對回應頻率與品質敏感，節奏落差時容易不安。',
+            style: '👉 我需要感受到你在我身邊。互動的溫度就是安全感來源。',
+            blind: '可能因回應不足而焦慮，對低頻或高自主型伴侶較辛苦。',
+            match: '適合願意表達與回應情感，且節奏穩定的人。'
+        },
+        C: {
+            title: '🌿 ③ 穩定平衡型（中需求 × 穩節奏）',
+            trait: '重視生活與關係平衡，不過度依賴也不過度疏離，互動自然。',
+            style: '👉 不用太用力，但要一直在。追求舒服且可長期維持的關係。',
+            blind: '可能忽略高情感需求的伴侶，對強烈情緒較不敏感。',
+            match: '適合節奏穩定、不過度黏也不過度抽離的人。'
+        },
+        D: {
+            title: '🧍‍♀️ ④ 低頻獨立型（低需求 × 高自主）',
+            trait: '重視個人空間與自主性，不需要頻繁互動。',
+            style: '👉 有你很好，但我也有我自己。關係存在，但不佔據全部。',
+            blind: '容易被誤解為冷淡，面對高需求伴侶會感到壓力。',
+            match: '適合同樣重視空間、能理解你節奏的人。'
+        },
+        E: {
+            title: '🌊 ⑤ 流動觀察型（彈性高 × 未定向）',
+            trait: '依情境調整投入與互動，有時靠近有時抽離。',
+            style: '👉 先看看這段關係會走到哪裡。不急著定義，也不強求進展。',
+            blind: '容易讓對方感到不穩定，可能長期停在觀察階段。',
+            match: '適合能接受彈性變化、不急於確立關係的人。'
         }
+    };
+
+    let latestScore = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+
+    function calculateScoreFromForm(formData) {
+        const score = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+        ['q2', 'q3', 'q4', 'q5', 'q6'].forEach((qid) => {
+            const option = formData.get(qid);
+            if (!option) return;
+            const types = SCORING_MAP[qid][option] || [];
+            types.forEach((type) => {
+                score[type] += 1;
+            });
+        });
+        return score;
     }
 
-    function nextQuestion() {
-        const currentCard = getCurrentQuestion();
-        const selected = currentCard.querySelector('.option.selected');
-        
-        if (!selected) {
-            alert('請先選擇一個答案！');
+    function allAnswered(formData) {
+        for (let i = 1; i <= 6; i++) {
+            if (!formData.get('q' + i)) return false;
+        }
+        return true;
+    }
+
+    function updateAnsweredCount(formData) {
+        let count = 0;
+        for (let i = 1; i <= 6; i++) {
+            if (formData.get('q' + i)) count += 1;
+        }
+        document.getElementById('answeredCount').textContent = String(count);
+    }
+
+    function renderResults(formData) {
+        const sorted = Object.entries(latestScore).sort((a, b) => b[1] - a[1]);
+        const primary = sorted[0][0];
+        const secondary = sorted[1][0];
+
+        const summary = document.getElementById('summaryBox');
+        summary.innerHTML =
+            '<strong>主要關係運作型：</strong>' + TYPE_LABELS[primary] +
+            '（' + primary + '）<br><strong>次要傾向：</strong>' + TYPE_LABELS[secondary] + '（' + secondary + '）';
+
+        const scoreGrid = document.getElementById('scoreGrid');
+        scoreGrid.innerHTML = '';
+        ['A', 'B', 'C', 'D', 'E'].forEach((type) => {
+            const card = document.createElement('div');
+            card.className = 'score-item';
+            card.innerHTML = '<div style="font-weight:700">' + type + '</div><div>' + TYPE_LABELS[type] + '</div><div style="font-size:1.3rem;font-weight:800">' + latestScore[type] + '</div>';
+            scoreGrid.appendChild(card);
+        });
+
+        const loveChoice = formData.get('q1');
+        document.getElementById('loveLanguageBox').innerHTML =
+            '<strong>💙 互動題補充：</strong>' + (LOVE_LANGUAGE_ANALYSIS[loveChoice] || '未選擇');
+
+        const advanced = [];
+        if (latestScore.B >= 2 && latestScore.D >= 2) advanced.push('B + D 高：焦慮 × 逃避拉扯型（內在矛盾）');
+        if (latestScore.A >= 2 && latestScore.C >= 2) advanced.push('A + C 高：成熟穩定型（高適配）');
+        if (latestScore.E >= 3) advanced.push('E 高：未定型／觀察期人格');
+        document.getElementById('advancedBox').innerHTML =
+            '<strong>🔥 進階判讀：</strong><br>' + (advanced.length ? advanced.join('<br>') : '目前沒有明顯的進階組合。');
+
+        const analysisList = document.getElementById('analysisList');
+        analysisList.innerHTML = '';
+        ['A', 'B', 'C', 'D', 'E'].forEach((type) => {
+            const detail = TYPE_DETAILS[type];
+            const card = document.createElement('article');
+            card.className = 'analysis-card' + (type === primary || type === secondary ? ' highlight' : '');
+            card.innerHTML =
+                '<h3>' + detail.title + '</h3>' +
+                '<p><strong>✨ 特徵：</strong>' + detail.trait + '</p>' +
+                '<p><strong>❤️ 關係樣貌：</strong>' + detail.style + '</p>' +
+                '<p><strong>⚠️ 可能盲點：</strong>' + detail.blind + '</p>' +
+                '<p><strong>🤝 適合對象：</strong>' + detail.match + '</p>';
+            analysisList.appendChild(card);
+        });
+    }
+
+    const form = document.getElementById('quizForm');
+
+    function enableFullOptionClick() {
+        document.querySelectorAll('.option-item').forEach((item) => {
+            item.addEventListener('click', (event) => {
+                if (event.target.tagName.toLowerCase() === 'input') return;
+                const input = item.querySelector('input[type="radio"]');
+                if (!input) return;
+                input.checked = true;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        });
+    }
+
+    form.addEventListener('change', () => {
+        const formData = new FormData(form);
+        updateAnsweredCount(formData);
+        latestScore = calculateScoreFromForm(formData);
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        updateAnsweredCount(formData);
+        if (!allAnswered(formData)) {
+            alert('請先完成全部 6 題再送出。');
             return;
         }
 
-        if (currentQuestionIndex < totalQuestions - 1) {
-            currentQuestionIndex++;
-            updateDisplay();
-        } else {
-            // 最後一題，顯示完成提示
-            document.getElementById('resultSummary').classList.add('show');
-            document.getElementById('nextBtn').disabled = true;
-        }
-    }
+        latestScore = calculateScoreFromForm(formData);
+        renderResults(formData);
 
-    function updateDisplay() {
-        const questions = document.querySelectorAll(`#${currentCategory}-questions .question-card`);
-        
-        // 隱藏所有題目
-        questions.forEach(q => q.classList.remove('active'));
-        
-        // 顯示當前題目
-        questions[currentQuestionIndex].classList.add('active');
-        
-        // 更新進度顯示
-        document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
-        
-        // 更新按鈕狀態
-        document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
-        document.getElementById('nextBtn').disabled = false;
-        document.getElementById('nextBtn').textContent = 
-            currentQuestionIndex === totalQuestions - 1 ? '完成 ✓' : '下一題 →';
-    }
+        const resultSection = document.getElementById('resultSection');
+        resultSection.classList.add('show');
+        resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
-    function getCurrentQuestion() {
-        return document.querySelectorAll(`#${currentCategory}-questions .question-card`)[currentQuestionIndex];
-    }
-
-    // 初始化
-    updateDisplay();
+    enableFullOptionClick();
 </script>
-
 </body>
 </html>
