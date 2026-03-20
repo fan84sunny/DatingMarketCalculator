@@ -487,8 +487,10 @@
     // 遊戲配置
     const GAME_CONFIG = {
         maxScore: 10,
-        questionInterval: 5000, // 5秒出現一題
-        questionDuration: 5000   // 5秒回答時間
+        questionInterval: 6000, // 5秒出現一題
+        questionDuration: 5000,   // 5秒回答時間
+        initialQuestionDelay: 3000, // 開局第一題等待3秒
+        postAnswerDelay: 1000     // 作答後至少等待1秒再出下一題
     };
     
     // 問題庫 - 格式: {問題, 選項: [{文案, 評分}]}
@@ -860,7 +862,7 @@
         document.getElementById('startModal').classList.add('hidden');
         updateQuestionProgress();
         updateQuestionTimerDisplay(getQuestionDurationSeconds());
-        scheduleNextQuestion();
+        scheduleNextQuestion(GAME_CONFIG.initialQuestionDelay);
     }
 
     function updateQuestionProgress() {
@@ -930,14 +932,14 @@
     }
     
     // 排程下一個問題
-    function scheduleNextQuestion() {
+    function scheduleNextQuestion(delay = GAME_CONFIG.questionInterval) {
         if (gameState.isGameOver || !gameState.hasStarted) return;
         
         setTimeout(() => {
             if (!gameState.isGameOver) {
                 showQuestion();
             }
-        }, GAME_CONFIG.questionInterval);
+        }, delay);
     }
     
     // 顯示問題
@@ -1009,7 +1011,7 @@
                     if (gameState.score <= 0) {
                         endGame();
                     } else {
-                        scheduleNextQuestion();
+                        scheduleNextQuestion(GAME_CONFIG.postAnswerDelay);
                     }
                 }
             }
@@ -1042,7 +1044,7 @@
             if (gameState.score <= 0) {
                 endGame();
             } else {
-                scheduleNextQuestion();
+                scheduleNextQuestion(GAME_CONFIG.postAnswerDelay);
             }
         }, 800);
     }
